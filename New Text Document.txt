@@ -26,7 +26,9 @@ val join=wasacmapleftOuterJoin(acortmap)
 
 input
 1) a,b,c
+leftouter join
+2) g,d,e,f
 
-2) a,d,e
+out (a,b,c,none)
 
-out (a,b,c,e)
+out (a,b,c,e,f)
