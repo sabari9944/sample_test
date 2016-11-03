@@ -1,0 +1,22 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkConf
+class sample{
+
+val conf = new SparkConf().setAppName("appName").setMaster("master")
+val sc = new SparkContext(conf)
+
+def ios(s:String):String =
+  {
+    val result = s.replace("/n","")
+    result
+  } 
+
+val wasac=sc.textFile("/obs/data/src/INCIDENTOLOGIE_WASAC/wasac.csv")
+val wasacmap=wasac.map(x => x.split(";")).map(x => ((x(0))->(x(0),x(1),x(2),x(3),x(4),x(5),x(6),x(7))))
+
+
+val acort=sc.textFile("/obs/data/src/acort.csv")
+val acortmap=wasac.map(x => x.split(";")).map(x => ((x(2))->(x(0),x(1),x(2),x(3),x(4),x(5),x(6))))
+
+
+val join=wasacmapleftOuterJoin(acortmap)
