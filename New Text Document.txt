@@ -20,3 +20,13 @@ val acortmap=wasac.map(x => x.split(";")).map(x => ((x(2))->(x(0),x(1),x(2),x(3)
 
 
 val join=wasacmapleftOuterJoin(acortmap)
+
+
+
+
+input
+1) a,b,c
+
+2) a,d,e
+
+out (a,b,c,e)
