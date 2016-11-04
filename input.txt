@@ -1,0 +1,107 @@
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head incidentologie_wasac.csv
+"feuillet";"ip_admin";"type_routeur";"ios";"constructeur";"chassis";"rsc";"version_boot"
+"TE5435FWJ6";"98.100.125.515";"GHN67";"MUOFW28-XPDA_XJN_26L_WQ-J2.8F8Y00_UM4";"XBFVAJRCG";"GHN67";"FXDBDMB YTDVPDJ";"JUUX49-JCY-D9.8Y1W28"
+"SU458UMKB6";"71.86.772.885";"GHN67";"MUOFW91-XPDA_XJN_98L_WQ-J4.6F6Y91_UM6";"XBFVAJRCG";"GHN67";;"JUUX49-JCY-D9.8Y1W28"
+"YL05SS11HR";"17.965.92.699";"GHN67";"MUOFW78-XPDA_XJN_82L_WQ-J4.8F2Y63_UM4";"XBFVAJRCG";"GHN67";;"DQYY87-VPP-N2.9N6O73T"
+"UR22Q5UOK7";"28.49.547.037";"GHN67";;"XBFVAJRCG";"GHN67";;"DQYY87-VPP-N2.9N6O73T"
+"DT41136XTG";"15.179.951.55";"GHN42";"MUOFW33-XPDA_XJN_74L_WQ-J7.3F6Y75_UM5";"XBFVAJRCG";"CMQ00-M3X";"GPSPAJRC AJRBGF";"JUUX77-JCY-D0.7Y1W95"
+"PZ07BBBD55";"63.46.468.21";;;"JKVRQ";;"IJWUH QITDJI";
+"RL67QJB9X6";"347.062.070.789";"VGI275";;"XBFVAJRCG";"VGI275";;"IWJN2-XLK-X1.8Z0S00"
+"TH79WQ0NWD";"42.33.152.01";"GHN67";;"XBFVAJRCG";"GHN67";"UKNRCOI WHCSBP";"JUUX49-JCY-D9.8Y1W28"
+"HJ40EMVKL7";"91.035.3.68";"GHN52";"OMEUG2-HAYN_WPS_UX-J2.1R9D94_AR0";"XBFVAJRCG";"GHN52";;"IWJN2-XLK-X7.0Z0S23"
+
+
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head acort.csv
+"num_pivot";"element_reseau";"type_interne";"support";"debit";"role";"type_si"
+"T_12518";"172366";"_";;;;"PREST"
+"T_1486";"172366";"_";;;;"PREST"
+"T_15037";"61608530";"_";;;;"PREST"
+"T_16609";"26463563";"_";;;;"PREST"
+"T_11623";"46905YUE";"_";;;;"PREST"
+"T_13645";"27433C";"_";;;;"PREST"
+"PL_1";"099350413Q083";"R_TRL";;;;"CE-TRL"
+"PL_1";"477411402C391";"S_ZIAT";"IP ADSL";;;"A-ZIAT"
+"T_2";"899675626C200";"P_ZLNS";;;;"P-ZLNS"
+
+
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head BR_EDS.csv
+"eds_idteds";"eds_lbapteds";"eds_nomcrteds"
+"ERIS2H";"SCE";"Support Niveau 1 Offre UCAAS"
+"CZJLKQ";"SCE";"COCKPIT SECURISE"
+"CYKBXZ";"SCE";"USC SAV ILE de FRANCE"
+"DRSZN8";"FT-maison mère";"NE PLUS UTILISER _ACTIVER ---->ATQUME"
+"DRSZN0";"FT-maison mère";"ACTIVER ---->ATQUME"
+"HLWVBH";"SCE";"MSC France SO"
+"UXWWXP";"SCE";"CSC IVRY SOCIETE GENERALE"
+"SYGCJC";"SCE";"USC MIDI EST"
+"WSSNDK";"SCE";"USC GRAND OUEST"
+
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head BR_GAR.csv
+"ipr_idtprd";"gar_idtcodgar";"gar_lbcodgar"
+"41090057";"J+2";"Lundi au Samedi 8h à 18h"
+"41097367";"J+2";"Lundi au Samedi 8h à 18h"
+"41095728";"J+2";"Lundi au Samedi 8h à 18h"
+"41096193";"J+2";"Lundi au Samedi 8h à 18h"
+"41133290";"J+2";"Lundi au Samedi 8h à 18h"
+"41121278";"J+2";"Lundi au Samedi 8h à 18h"
+"41126521";"J+2";"Lundi au Samedi 8h à 18h"
+"41118628";"J+2";"Lundi au Samedi 8h à 18h"
+"41117515";"J+2";"Lundi au Samedi 8h à 18h"
+
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head BR_HPR.csv
+"ipr_datdebimgprd";"ipr_datfinimgprd";"isr_idtsoures";"ipr_idtetaprd";"ipr_idtcom";"ipr_idtprd";"ipr_lbtypprd"
+"20100604";"99991231";"1283289";"PARC TOTAL";"609389623Q291";"44567652";"Transrel v2"
+"19000101";"99991231";"1492119";"PARC TOTAL";"MT6391398/NS0212212";"32948108";"Liaison louée"
+"19000101";"99991231";"1304282";"PARC TOTAL";"MT0043664/NS1763075";"30023648";"Liaison louée"
+"19000101";"99991231";"1304282";"PARC TOTAL";"MT1062783/NS7499033";"30021814";"Liaison louée"
+"19000101";"99991231";"1492414";"PARC TOTAL";"TMK37240312";"32947827";"Liaison louée"
+"19000101";"99991231";"1491995";"PARC TOTAL";"TMK46189260";"32948069";"Liaison louée"
+"19000101";"99991231";"1492119";"PARC TOTAL";"MT2151583/NS4208987";"32948096";"Liaison louée"
+"19000101";"99991231";"1304065";"PARC TOTAL";"DS8660610";"64246028";"Liaison louée"
+"19000101";"99991231";"1304417";"PARC TOTAL";"DS4677103";"64246185";"Liaison louée"
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head BR_IPR2.csv
+"ipr_idtprd";"ipr_voibpexta";"ipr_comexta";"ipr_codptlcomexta";"ipr_lbpayexta";"ipr_steutlexta";"ipr_voibpextb";"ipr_comextb";"ipr_codptlcomextb";"ipr_lbpayextb";"ipr_steutlextb";"ipr_datmescom"
+"66483010";"06 AMO WY UJBVPQ";"AQFRJ 92";"61686";"Ozmgjq";"LNMMYXUBE LLDXZICC UUBMARHR";;;;;;"20090420"
+"66483358";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090407"
+"66483371";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090603"
+"66483380";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090603"
+"66483429";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090603"
+"66483491";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090603"
+"66483563";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090603"
+"66483622";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090407"
+"66483628";"51 AXA VBDTUL";"IFPX";"85042";"Ozmgjq";"XXLXUIQLZ MMQ";;;;;;"20090407"
+
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head BR_ISR.csv
+"isr_idtsoures";"isr_datdebimgsoures";"isr_datfinimgsoures";"eds_idteds";"tie_idttie"
+"1846325";"20111022";"99991231";"SYGCJC";"95647"
+"1848543";"20080519";"99991231";"USP682";"350170"
+"52727";"20071203";"99991231";"CYKBXZ";"98060"
+"98680";"20071203";"99991231";"CYKBXZ";"690"
+"109920";"20040705";"99991231";;"34151"
+"125437";"20080515";"99991231";"WSSNDK";"80030"
+"1897229";"20090114";"99991231";"TABB85";"1"
+"1897230";"20090114";"99991231";"TABB85";"1"
+"1897231";"20090114";"99991231";"TABB85";"1"
+
+
+sabarm@frparvm51144354: DEV  /obs/data/raw > head BR_TIE.csv
+"tie_idttie";"tie_raiscltie";"tie_atitie";"tie_sirtie";"tie_marcli";"tie_teltie";"tie_faxtie";"tie_blnstftie";"tie_hst";"tie_dathst";"tie_lbtyptie";"tie_voibptie";"tie_cmpvoitie";"tie_comtie";"tie_codptlcomtie";"tie_lbpaytie";"tie_raiscltiegrp";"tie_idteds";"tie_lbtyptieang";"tie_sgltie";"tie_emltie";"tie_trttie";"tie_cmttie";"tie_datmodtie";"tie_numvrtcsctie";"tie_faxcsctie";"tie_aeleader";"tie_idttyptie";"tie_lbpaytieang";"tie_idtpaytie";"tie_idttiegrp";"tie_codsegtie";"tie_lblsegtie";"tie_segnat";"tie_segloc";"tie_ortff";"tie_mqpartdvi";"tie_mqetranger";"tie_macsectnat";"tie_micsectnat";"tie_micsectloc";"tie_polven";"tie_nbetab";"tie_idcmaismere";"tie_nbetabdeci";"tie_codnaf";"tie_lblnaf";"tie_codsecapen31";"tie_formjur";"tie_motifcre";"tie_nomusage"
+"3";"Yeqcpp aihiktié";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+"798";"DCVMTJFCL FKDFDAQKGQC";;;"1";;;"0";"1";"20100920";"Entreprise";"  16410 QYFBXVU PC57622-3875";;"WTSGGJZY";"40315";"Ozmgjq";;;"Corporate";;;"1";;"20100920";;;"EBY";"1";"France";"F";;"GC";"Grand Compte";;;;;"1";;;"I3-Hi Tech & informatique";"1E1";"1";"N";"1";"516G";"Commerce de gros de machines de bureau et de materiel informatique";"GA";"9900";"Creation";
+"5402399";"EYIKB";;"F00006271";;;;"0";"1";"20060317";"Entreprise";"  1339, LABCO (90500)";"36 TH TMFQUUTL";"WTSGGJZY";"40315";"Ozmgjq";;;"Corporate";;;"1";;"20060317";;;"EAL";"1";"France";"F";;"EN";"Entreprise";"CA FT nul depuis 3 ans";"Argent";;;"1";"Z-Secteur non définissable";"Z1-Secteur non définissables";;"IFD";"2";"N";"1";"000Z";"en instance de chiffrement";"ZZ";"3290";"Creation";
+"7125246";"JIIAOUVND UUJJ EDYIJL";;"R00046286";;;;"0";"1";"20060405";"Entreprise";"87 MWN WH HR UTREUU";;"AQFRJ 17";"67385";"Ozmgjq";;;"Corporate";;;"0";;"20060405";;;;"1";"France";"F";;;;;;;;;;;;;;;;;;;;;
+"5152368";"SSDK HRDWUNIGC";;"R00046251";;;;"0";"1";"20060405";"Entreprise";"XLKBG XK VUEVXP";"LU 58";"TFB";"62948";"Ozmgjq";;;"Corporate";;;"0";;"20060405";;;;"1";"France";"F";;;;;;;;;;;;;;;;;;;;;
+"5531101";"HNMEHB DEQ";;"R00046270";;;;"0";"1";"20060119";"Entreprise";"1 HMB YOPY PQRQYY";;"MUCYGHGU";"36043";"Ozmgjq";;;"Corporate";;;"0";;"20060119";;;;"1";"France";"F";;;;;;;;;;;;;;;;;;;;;
+"1701456";"JB DPKJU WWEAKGZH SEZ";;;"2";;;"0";"1";"20060303";"Entreprise";"154 Lisovfdq";"Jgxah 0";"AVKDV";"34442";"Ozmgjq";;;"Corporate";;;"0";;"20060303";;;;"1";"France";"F";;;;;;;;;;;;;;;;;;;;;
+"0066707";"Mqnzrq'Qtovcf";;;"2";;;"0";"1";"20060303";"Entreprise";"64 Rrodef";;"POZ OP CCLJSCXB";"22717";"Ozmgjq";;;"Corporate";;;"0";;"20060303";;;;"1";"France";"F";;;;;;;;;;;;;;;;;;;;;
+"3453102";"JB DPKJU WWEAKGZH SEZ";;;"2";;;"0";"1";"20060303";"Entreprise";"154 Lisovfdq";"Jgxah 0";"AVKDV";"34442";"Ozmgjq";;;"Corporate";;;"0";;"20060303";;;;"1";"France";"F";;;;;;;;;;;;;;;;;;;;;
+
+
+

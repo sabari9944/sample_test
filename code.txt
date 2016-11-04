@@ -1,0 +1,40 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+object sample {
+def main(args: Array[String]) {
+val conf = new SparkConf().setAppName("appName").setMaster("master")
+val sc = new SparkContext(conf)
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+val br_eds=sc.textFile("br_eds.csv")
+val br_eds_map=br_eds.map(x => x.split(";")).map(x => ((x(0))->(x(0),x(1),x(2))))
+val br_isr=sc.textFile("br_isr.csv")
+val br_isr_map=br_isr.map(x => x.split(";")).map(x => ((x(3))->(x(0),x(1),x(2),x(3),x(4))))
+val join_1=br_eds_map.leftOuterJoin(br_isr_map)
+
+
+// br_ipr.csv
+val br_ipr2=sc.textFile("br_ipr2.csv")
+val br_ipr2_map=br_ipr2.map(x => x.split(";")).map( x=> (x.split(";")(0),x))
+
+val br_hpr=sc.textFile("br_hpr.csv")
+val br_hpr_map=br_hpr.map(x => x.split(";")).map(x => ((x(5))->(x(0),x(1),x(2),(x(3)),x(4),x(5),x(6))))
+val br_ipr=br_ipr2_map.join(br_hpr_map)
+val br_ipr_map=br_ipr.map(x => x.split(";")).filter(x => (x(3)== "PARC PARTIEL" OR "PARC TOTAL" OR "CARNET" OR "EN COURS") AND (x(6) =="Client Routeur" OR "Core Routeur" OR "Data container routeur" OR "ETH + ROUTEUR POUR DATACENTER" OR "GI ADSL Ext avec routeur SIG" OR "GI Permanent Ext + routeur SIG" OR "IS Routeur" OR "ISP Routeur" OR "IT Routeur" OR "Outils configuration routeurs" OR "P-ROUTEUR" OR "Prest. de Conf. Routeur" OR "PS Routeur" OR "Routeur" OR "Routeur (GOS)" OR "Routeur CISCO" OR "Routeur collecte GE" OR "Routeur concentré client" OR "Routeur CPE" OR "Routeur d"accès VoIP" OR "Routeur EGN" OR "Routeur intranet rés. loc." OR "Routeur MPLS" OR "Routeur multi protocoles" OR "Routeur OSM" OR "ROUTEUR POUR WIMAX" OR "Routeurs" OR "Routeurs Switches IPMPLS (TKL)" OR "RSS - Routeur" OR "RSS - Routeur Commuté Oléane" OR "SHADOW-ROUTEUR" OR "Switch-Routeur" OR "VASP Routeur" OR "Transrel Offre Modulaire" OR "Transrel OM  accès secours" OR "Transrel v2" OR "RSS - Equipement" OR "Liaison louée" OR "Accès DSL International" )
+
+val br_gar=sc.textFile("br_gar.csv")
+val br_gar_map=br_gar.map(x => x.split(";")).map( x=> (x.split(";")(0),x))
+val join_2=br_ipr_map.leftOuterJoin(br_gar_map)
+
+val join_3 = join_1.leftOuterJoin(join_2)
+
+val br_tie=sc.textFile("br_tie.csv")
+val br_tie_map=br_tie.map(x => x.split(";")).map( x=> (x.split(";")(0),x))
+
+join_4= join_3.leftOuterJoin(br_tie_map)
+join_4.saveAsTextFile("sub_graph.csv")
+
+  }
+}
