@@ -1,0 +1,64 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+
+class sample {
+def main(args: Array[String]) {
+val conf = new SparkConf().setAppName("appName").setMaster("master")
+val sc = new SparkContext(conf)
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+// read the file 
+val wasac = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/incidentologie_wasac.csv")
+wasac.count()
+wasac.dtypes
+wasac.show()
+//df.describe().show()
+//df.describe().dtypes
+wasac.printSchema()
+
+val BR_EDS = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_EDS.csv")
+BR_EDS.printSchema()
+val BR_GAR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_GAR.csv")
+BR_GAR.printSchema()
+val BR_HPR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_HPR.csv")
+BR_HPR.printSchema()
+
+//val BR_HPR_1 = BR_HPR.withColumn("ipr_idtprd", tostring(BR_HPR("ipr_idtprd")))
+//val a = BR_HPR.select(BR_HPR("ipr_datdebimgprd").cast("date"))
+
+val BR_HPR_1 = BR_HPR.selectExpr("cast(ipr_datdebimgprd as date) as ipr_datdebimgprd" , "cast(ipr_datfinimgprd as date) as ipr_datfinimgprd", "isr_idtsoures", "ipr_idtetaprd", "ipr_idtcom", "cast(ipr_idtprd as string) as ipr_idtprd","ipr_lbtypprd" )
+BR_HPR_1.printSchema()
+
+val BR_IPR2 = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_IPR2.csv")
+BR_IPR2.printSchema()
+val tostring = udf[String, Int]( _.toString)
+val BR_IPR2_1 = BR_IPR2.withColumn("ipr_idtprd", tostring(BR_IPR2("ipr_idtprd")))
+BR_IPR2_1.printSchema()
+
+val BR_ISR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_ISR.csv")
+BR_ISR.printSchema()
+val BR_TIE = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_TIE.csv")
+BR_TIE.printSchema()
+val BR_TIE_1 = BR_TIE.selectExpr("tie_idttie","tie_raiscltie","tie_sirtie","tie_voibptie","tie_cmpvoitie","tie_codptlcomtie","tie_comtie","tie_lbpaytie")
+BR_TIE_1.printSchema()
+
+
+val join_1 = BR_EDS.join(BR_ISR, BR_EDS("eds_idteds") === BR_ISR("eds_idteds"),"left_outer")
+val join_1_out = BR_EDS.selectExpr("eds_idteds","eds_lbapteds","eds_nomcrteds","isr_idtsoures","isr_datdebimgsoures","isr_datfinimgsoures","tie_idttie")
+join_1_out.count()
+
+val join_2 = BR_IPR2_1.join(BR_HPR_1,BR_IPR2_1("ipr_idtprd") === BR_HPR_1("ipr_idtprd"),"inner")
+val join_2_out = join_2.selectExpr("ipr_datdebimgprd", "ipr_datfinimgprd","isr_idtsoures","ipr_idtetaprd","ipr_idtcom","ipr_idtprd","ipr_lbtypprd","ipr_voibpexta","ipr_comexta","ipr_codptlcomexta", "ipr_lbpayexta", "ipr_steutlexta", "ipr_voibpextb", "ipr_comextb", "ipr_codptlcomextb", "ipr_lbpayextb", "ipr_steutlextb", "ipr_datmescom" ).filter((ipr_idtetaprd === "PARC PARTIEL" OR "PARC TOTAL" OR "CARNET" OR "EN COURS") AND (ipr_lbtypprd === "Client Routeur" OR "Core Routeur" OR "Data container routeur" OR "ETH + ROUTEUR POUR DATACENTER" OR "GI ADSL Ext avec routeur SIG" OR "GI Permanent Ext + routeur SIG" OR "IS Routeur" OR "ISP Routeur" OR "IT Routeur" OR "Outils configuration routeurs" OR "P-ROUTEUR" OR "Prest. de Conf. Routeur" OR "PS Routeur" OR "Routeur" OR "Routeur (GOS)" OR "Routeur CISCO" OR "Routeur collecte GE" OR "Routeur concentré client" OR "Routeur CPE" OR "Routeur d"accès VoIP" OR "Routeur EGN" OR "Routeur intranet rés. loc." OR "Routeur MPLS" OR "Routeur multi protocoles" OR "Routeur OSM" OR "ROUTEUR POUR WIMAX" OR "Routeurs" OR "Routeurs Switches IPMPLS (TKL)" OR "RSS - Routeur" OR "RSS - Routeur Commuté Oléane" OR "SHADOW-ROUTEUR" OR "Switch-Routeur" OR "VASP Routeur" OR "Transrel Offre Modulaire" OR "Transrel OM  accès secours" OR "Transrel v2" OR "RSS - Equipement" OR "Liaison louée" OR "Accès DSL International" ))
+join_2_out.count()
+
+
+
+val bc = sc.broadcast(Array[String]("Liaison louée"))
+val func: (String => Boolean) = (arg: String) => bc.value.contains(arg)
+val sqlfunc = udf(func)
+val filtered = join_2_out.filter(sqlfunc(col("ipr_lbtypprd")))
+
+}
+}

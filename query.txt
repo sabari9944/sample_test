@@ -1,0 +1,40 @@
+************* Query ****************
+
+select ce_id, category, subcategory, count(*) as nb_repetitions 
+from
+(select distinct num_ticket, ce_id, category, subcategory  
+from PN_TICKETS_ENRICHIS
+where is_gtrisable='Oui'
+and date_debut_ticket > add_months (date_debut_ticket, -1)
+and ce_id is not null)
+group by ce_id, category, subcategory
+having count(*) > 1
+  
+
+
+
+*******************************
+
+val df = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/tickets_enrichis.csv")
+  
+val getTimestamp = udf((x: String) => { val format = new SimpleDateFormat("yyyyMMddhhmmss")
+if (x.toString() == null) null 
+else 
+{ 
+val d = format.parse(x.toString()); 
+val t = new Timestamp(d.getTime()); 
+ t} 
+})
+   
+val aaa = df.withColumn("date_debut_ticket_result", add_months(getTimestamp(df("date_debut_ticket")),-1))
+
+val bbb = aaa.filter($"is_gtrisable" === "Oui")
+.filter($"ce_id".isNotNull)
+.filter((getTimestamp($"date_debut_ticket")).gt($"date_debut_ticket_result"))
+
+val ccc = bbb.select("num_ticket", "ce_id", "category", "subcategory" ).distinct 
+
+val ddd = ccc.select("ce_id", "category", "subcategory")
+.groupBy("ce_id","category","subcategory").count()
+
+val eee = ddd.filter($"count".gt("1")))
