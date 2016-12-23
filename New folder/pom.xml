@@ -1,0 +1,286 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0        
+              http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>obs</groupId>
+	<artifactId>predictive-network</artifactId>
+	<name>OBS_PN</name>
+	<packaging>pom</packaging>
+	<version>G00R00C02-SNAPSHOT</version>
+
+	<modules>
+		<module>CommonPN</module>
+		<module>ParcMarine2</module>
+		<module>TicketEnrichi</module>
+	</modules>
+
+	<properties>
+
+		<!-- java compiler version -->
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+
+		<!-- encoding -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+		<!-- scala / spark -->
+		<scala.version>2.10.6</scala.version>
+		<spark.version>1.5.2</spark.version>
+
+		<!-- scoverage -->
+		<scoverage.plugin.version>1.3.0</scoverage.plugin.version>
+		<scoverage.aggregate>true</scoverage.aggregate>
+
+		<!--Sonar -->
+		<sonar.core.codeCoveragePlugin>scoverage</sonar.core.codeCoveragePlugin>
+		<sonar.junit.reportsPath>target/surefire-reports</sonar.junit.reportsPath>
+		<!-- using -->
+		<sonar.scoverage.reportPath>../target/scoverage.xml</sonar.scoverage.reportPath>
+		<!-- sadly sonar.scoverage.itReportPath does not exists -->
+		<sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+		<sonar.scm.disabled>true</sonar.scm.disabled>
+		<sonar.sources>src/main/scala</sonar.sources>
+
+	</properties>
+
+	<build>
+
+		<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
+		<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
+		<directory>${basedir}/target</directory>
+		<testResources>
+			<testResource>
+				<directory>${basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.5.1</version>
+				<configuration>
+					<skipMain>true</skipMain> <!-- skip compile -->
+					<skip>true</skip> <!-- skip testCompile -->
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>3.2.2</version>
+				<executions>
+					<execution>
+						<id>default-sbt-compile</id>
+						<goals>
+							<goal>compile</goal>
+							<goal>testCompile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<skipTests>false</skipTests>
+					<workingDirectory>${project.build.directory}</workingDirectory>
+					<basedir>${project.build.directory}</basedir>
+				</configuration>
+			</plugin>
+
+			<!-- usage full test : mvn integration-test -->
+			<!-- usage only IT -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>2.19.1</version>
+				<configuration>
+					<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+					<workingDirectory>${project.build.directory}</workingDirectory>
+					<basedir>${project.build.directory}</basedir>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>integration-test</goal>
+							<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- for coverage UT + IT -->
+			<!-- usage : mvn scoverage:integration-report -->
+			<plugin>
+				<groupId>org.scoverage</groupId>
+				<artifactId>scoverage-maven-plugin</artifactId>
+				<version>${scoverage.plugin.version}</version>
+				<configuration>
+					<highlighting>true</highlighting>
+				</configuration>
+			</plugin>
+
+			<!-- for self sufficient zip -->
+			<!-- usage : mvn assembly:assembly -->
+			<!-- other possibility : mvn -DoutputDirectory=DEPENDENCIES dependency:copy-dependencies -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<descriptors>
+						<descriptor>src/assembly.xml</descriptor>
+					</descriptors>
+				</configuration>
+			</plugin>
+
+		</plugins>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-site-plugin</artifactId>
+					<version>3.5.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+	</build>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>${scala.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.9.5</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- OBS_PN -->
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-core_2.10</artifactId>
+			<version>${spark.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-sql_2.10</artifactId>
+			<version>${spark.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.spark</groupId>
+			<artifactId>spark-hive_2.10</artifactId>
+			<version>${spark.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.databricks</groupId>
+			<artifactId>spark-csv_2.10</artifactId>
+			<version>1.5.0</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-dbutils</groupId>
+			<artifactId>commons-dbutils</artifactId>
+			<version>1.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.typesafe</groupId>
+			<artifactId>config</artifactId>
+			<version>1.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.scalatest</groupId>
+			<artifactId>scalatest_2.10</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<reporting>
+
+		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>2.9</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>index</report>
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+			<plugin>
+				<groupId>org.scoverage</groupId>
+				<artifactId>scoverage-maven-plugin</artifactId>
+				<version>${scoverage.plugin.version}</version>
+				<reportSets>
+					<reportSet>
+						<reports>
+							<report>integration-report</report> <!-- select only one report from: report, integration-report and report-only 
+								reporters -->
+						</reports>
+					</reportSet>
+				</reportSets>
+			</plugin>
+
+		</plugins>
+
+	</reporting>
+
+</project>
+
+
+<!-- *** Deactivate *** -->
+<!-- New line at EOF -->
+<!-- Whitespace at EOL -->
+<!-- lines contains tab -->
+<!-- null -->
+<!-- Space after the start of the comment -->
+<!-- Return -->
+<!-- Space after plus -->
+
+<!-- *** Activate *** -->
+<!-- No redundant if expressions -->
+<!-- Use : Unit = for procedures -->
+<!-- Lines should have sufficient coverage by unit tests -->
+<!-- No while loops -->
+<!-- Source files should not have any duplicated blocks -->
+<!-- Source files should have a sufficient density of comment lines [30] -->
+
+<!-- *** Quality gate *** -->
+<!-- Bugs is greater thant 1, 2 -->
+<!-- Code Smells is greater thant 30, 50 -->
+<!-- Comments (%) is less thant 35, 30 -->
+<!-- Overall Coverage is less than 70, 65 -->
+<!-- Technical Debt Ratio is greater thant 1, 2 -->
+<!-- Unit Test Success (%) is less than 100, 95 -->
+<!-- Vulnerabilities is greater thant 1, 2 -->
+
+<!-- clean scoverage:integration-report install sonar:sonar -Dsonar.login=admin -Dsonar.password=admin -Dsonar.host.url=http://sonarqube:9000/sonarqube --> 

@@ -1,0 +1,7 @@
+addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.8.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.0")
+addSbtPlugin("com.artima.supersafe" % "sbtplugin" % "1.1.0")
+addSbtPlugin("org.xerial.sbt" % "sbt-pack" % "0.8.0")
+addSbtPlugin("com.github.saurfang" % "sbt-spark-submit" % "0.0.4")
+addSbtPlugin("org.clapper" % "sbt-editsource" % "0.7.0")
+addSbtPlugin("com.typesafe.sbteclipse" % "sbteclipse-plugin" % "5.0.1")
