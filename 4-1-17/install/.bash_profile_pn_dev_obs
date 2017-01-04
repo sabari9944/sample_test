@@ -1,0 +1,23 @@
+# .bash_profile_pn
+
+#Define env. variables for profile config
+#export PROJECT_INSTALL=$HOME/TechnicalCore/OBS_PN_G00R00C02-17/install
+#export PROJECT_HOME=$HOME/TechnicalCore/dataset
+#export file='.bash_profile'
+#export filepn='.bash_profile_pn'
+#export archive='OBS_PN_G00R00C02-17'
+
+#Define environnement type (dev_cap/dev_obs/uat/preprod/prod)
+export ENV='dev_obs'
+
+#Define agent type (READER/WRITER)
+export FLOW_PPREP_SRC_R='READER'
+#Define APP_ID for different sources
+export FLOW_PPREP_SRC_APPID_MARINE='BUI_EDH_MA'
+export FLOW_PPREP_SRC_APPID_OCEANE='BUI_EDH_OC'
+export FLOW_PPREP_SRC_APPID_WASAC='BUI_EDH_WA'
+export FLOW_PPREP_SRC_APPID_ACORT='BUI_EDH_AC'
+export FLOW_PPREP_SRC_APPID_SOIPA='BUI_EDH_SO'
+
+#echo 
+echo `date +"%Y/%m/%d %H:%M:%S"` "INFO : bash_profile_pn was sourced" | tee -a ${LOG_FILE}

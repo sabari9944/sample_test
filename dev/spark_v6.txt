@@ -1,0 +1,102 @@
+
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql._
+import com.typesafe.config.{ Config, ConfigFactory }
+import org.apache.spark.sql.functions._
+
+class abc {
+def main(args: Array[String]) {
+val conf = new SparkConf().setAppName("sub_graph_1")//.setMaster("local")
+val sc = new SparkContext(conf)
+val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+val prop = ConfigFactory.load()
+
+
+// read the file 
+val BR_EDS = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load(prop.getString("dev.BR_EDS"))
+BR_EDS.printSchema()
+
+val BR_GAR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load(prop.getString("dev.BR_GAR"))
+BR_GAR.printSchema()
+
+val BR_HPR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load(prop.getString("dev.BR_HPR"))
+BR_HPR.printSchema()
+
+//val BR_HPR_1 = BR_HPR.withColumn("ipr_idtprd", tostring(BR_HPR("ipr_idtprd")))
+//val a = BR_HPR.select(BR_HPR("ipr_datdebimgprd").cast("date"))
+
+import sqlContext.implicits._
+
+val BR_HPR_1 = BR_HPR.selectExpr("cast(ipr_datdebimgprd as date) as ipr_datdebimgprd" , "cast(ipr_datfinimgprd as date) as ipr_datfinimgprd", "isr_idtsoures", "ipr_idtetaprd", "ipr_idtcom", "cast(ipr_idtprd as string) as ipr_idtprd","ipr_lbtypprd" ).withColumn("ipr_lbtypprd", when($"ipr_lbtypprd" === "", "null").otherwise($"ipr_lbtypprd")).withColumn("ipr_idtetaprd", when($"ipr_idtetaprd" === "", "null").otherwise($"ipr_idtetaprd"))
+BR_HPR_1.printSchema() /* schema check */
+
+val BR_IPR2 = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load(prop.getString("dev.BR_IPR2"))
+BR_IPR2.printSchema()  /* schema check */
+
+/* TO String */
+val tostring = udf[String, Int]( _.toString)
+val BR_IPR2_1 = BR_IPR2.withColumn("ipr_idtprd", tostring(BR_IPR2("ipr_idtprd")))
+BR_IPR2_1.printSchema()  /* schema check */
+
+
+val BR_ISR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load(prop.getString("dev.BR_ISR"))
+BR_ISR.printSchema()  /* schema check */
+val BR_TIE = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load(prop.getString("dev.BR_TIE"))
+BR_TIE.printSchema() /* schema check */
+val BR_TIE_1 = BR_TIE.selectExpr("tie_idttie","tie_raiscltie","tie_sirtie","tie_voibptie","tie_cmpvoitie","tie_codptlcomtie","tie_comtie","tie_lbpaytie")
+BR_TIE_1.printSchema()  /* schema check */
+
+val join_1 = BR_EDS.as('a).join(BR_ISR.as('b), BR_EDS("eds_idteds") === BR_ISR("eds_idteds"),"left_outer")
+val join_1_out = join_1.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds",$"b.isr_idtsoures",$"b.isr_datdebimgsoures",$"b.isr_datfinimgsoures",$"b.tie_idttie").withColumn("isr_idtsoures", when($"b.isr_idtsoures" === "", "null").otherwise($"b.isr_idtsoures")).withColumn("tie_idttie", when($"b.tie_idttie" === "", "null").otherwise($"b.tie_idttie"))
+println("/***************/"+join_1_out.count()+"/***************/")
+
+val join_2 = BR_IPR2_1.as('a).join(BR_HPR_1.as('b),BR_IPR2_1("ipr_idtprd") === BR_HPR_1("ipr_idtprd"),"inner")
+val join_2_out = join_2.select($"b.ipr_datdebimgprd",$"b.ipr_datfinimgprd",$"b.isr_idtsoures",$"b.ipr_idtetaprd",$"b.ipr_idtcom",$"b.ipr_idtprd",$"b.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta", $"a.ipr_lbpayexta", $"a.ipr_steutlexta", $"a.ipr_voibpextb",$"a.ipr_comextb", $"a.ipr_codptlcomextb", $"a.ipr_lbpayextb", $"a.ipr_steutlextb", $"a.ipr_datmescom" ).filter($"ipr_idtetaprd" === "PARC PARTIEL" || $"ipr_idtetaprd" === "PARC TOTAL" || $"ipr_idtetaprd" === "CARNET" || $"ipr_idtetaprd" === "EN COURS" && $"ipr_lbtypprd" != "null" || $"ipr_lbtypprd" != "" || $"ipr_lbtypprd" != null )
+println("/***************/"+join_2_out.count()+"/***************/")
+
+/* broadcast  not working  = "Accès DSL International" */
+//val bc = sc.broadcast(Array[String]("Client Routeur" , "Core Routeur" , "Data container routeur" , "ETH + ROUTEUR POUR DATACENTER" , "GI ADSL Ext avec routeur SIG" , "GI Permanent Ext + routeur SIG" , "IS Routeur" , "ISP Routeur" , "IT Routeur" , "Outils configuration routeurs" , "P-ROUTEUR" , "Prest. de Conf. Routeur" , "PS Routeur" , "Routeur" , "Routeur (GOS)" , "Routeur CISCO" , "Routeur collecte GE" , "Routeur concentré client" , "Routeur CPE" , "Routeur d'accès VoIP" , "Routeur EGN" , "Routeur intranet rés. loc." , "Routeur MPLS" , "Routeur multi protocoles" , "Routeur OSM" , "ROUTEUR POUR WIMAX" , "Routeurs" , "Routeurs Switches IPMPLS (TKL)" , "RSS - Routeur" , "RSS - Routeur Commuté Oléane" , "SHADOW-ROUTEUR" , "Switch-Routeur" , "VASP Routeur" , "Transrel Offre Modulaire" , "Transrel OM  accès secours" , "Transrel v2" , "RSS - Equipement" , "Liaison louée" , "Accès DSL International"))
+//val func: (String => Boolean) = (arg: String) => bc.value.contains(arg)
+//val sqlfunc = udf(func)
+//val filtered = join_2_out.filter(sqlfunc(col("ipr_lbtypprd")))
+//println("/***************/"+filtered.count()+"/***************/")
+
+val join_3 = join_2_out.as('a).join(BR_GAR.as('b),join_2_out("ipr_idtprd") === BR_GAR("ipr_idtprd"),"left_outer")
+val join_3_out = join_3.select($"a.ipr_datdebimgprd",$"a.ipr_datfinimgprd",$"a.isr_idtsoures",$"a.ipr_idtetaprd",$"a.ipr_idtcom",$"a.ipr_idtprd",$"a.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta",$"a.ipr_lbpayexta",$"a.ipr_steutlexta",$"a.ipr_voibpextb",$"a.ipr_comextb",$"a.ipr_codptlcomextb",$"a.ipr_lbpayextb",$"a.ipr_steutlextb",$"a.ipr_datmescom",$"b.gar_lbcodgar",$"b.gar_lbplghor")
+println("/***************/"+join_3_out.count()+"/***************/")
+/*val join_3_out = join_3.select($"a.ipr_datdebimgprd",$"a.ipr_datfinimgprd",$"a.isr_idtsoures",$"a.ipr_idtetaprd",$"a.ipr_idtcom",$"a.ipr_idtprd",$"a.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta",$"a.ipr_lbpayexta",$"a.ipr_steutlexta",$"a.ipr_voibpextb",$"a.ipr_comextb",$"a.ipr_codptlcomextb",$"a.ipr_lbpayextb",$"a.ipr_steutlextb",$"a.ipr_datmescom",$"b.gar_lbcodgar",$"b.gar_idtcodgar") */
+
+val join_4 = join_1_out.as('a).join(join_3_out.as('b),join_1_out("isr_idtsoures") === join_3_out("isr_idtsoures"),"inner")
+val join_4_out = join_4.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds" ,$"a.isr_idtsoures",$"a.isr_datdebimgsoures",$"a.isr_datfinimgsoures",$"a.tie_idttie" ,$"b.ipr_datdebimgprd",$"b.ipr_datfinimgprd",$"b.ipr_idtetaprd",$"b.ipr_idtcom",$"b.ipr_lbtypprd",$"b.ipr_voibpexta",$"b.ipr_comexta",$"b.ipr_codptlcomexta",$"b.ipr_lbpayexta",$"b.ipr_steutlexta",$"b.ipr_voibpextb",$"b.ipr_comextb",$"b.ipr_codptlcomextb",$"b.ipr_lbpayextb",$"b.ipr_steutlextb",$"b.ipr_datmescom",$"b.gar_lbcodgar",$"b.gar_lbplghor")
+/*val join_4_out = join_4.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds" ,$"a.isr_idtsoures",$"a.isr_datdebimgsoures",$"a.isr_datfinimgsoures",$"a.tie_idttie" ,$"b.ipr_datdebimgprd",$"b.ipr_datfinimgprd",$"b.ipr_idtetaprd",$"b.ipr_idtcom",$"b.ipr_lbtypprd",$"b.ipr_voibpexta",$"b.ipr_comexta",$"b.ipr_codptlcomexta",$"b.ipr_lbpayexta",$"b.ipr_steutlexta",$"b.ipr_voibpextb",$"b.ipr_comextb",$"b.ipr_codptlcomextb",$"b.ipr_lbpayextb",$"b.ipr_steutlextb",$"b.ipr_datmescom",$"b.gar_lbcodgar",$"b.gar_idtcodgar") */
+println("/***************/"+join_4_out.count()+"/***************/")
+
+val join_5 = join_4_out.as('a).join(BR_TIE_1.as('b),join_4_out("tie_idttie") === BR_TIE_1("tie_idttie"),"inner")
+val join_5_out =join_5.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds",$"a.isr_idtsoures",$"a.isr_datdebimgsoures",$"a.isr_datfinimgsoures",$"a.tie_idttie",$"a.ipr_datdebimgprd",$"a.ipr_datfinimgprd",$"a.ipr_idtetaprd",$"a.ipr_idtcom",$"a.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta",$"a.ipr_lbpayexta",$"a.ipr_steutlexta",$"a.ipr_voibpextb",$"a.ipr_comextb",$"a.ipr_codptlcomextb",$"a.ipr_lbpayextb",$"a.ipr_steutlextb",$"b.tie_raiscltie",$"b.tie_sirtie",$"b.tie_codptlcomtie",$"a.ipr_datmescom",$"a.gar_lbcodgar",$"a.gar_lbplghor",$"b.tie_voibptie",$"b.tie_cmpvoitie",$"b.tie_comtie",$"b.tie_lbpaytie")
+/*val join_5_out =join_5.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds",$"a.isr_idtsoures",$"a.isr_datdebimgsoures",$"a.isr_datfinimgsoures",$"a.tie_idttie",$"a.ipr_datdebimgprd",$"a.ipr_datfinimgprd",$"a.ipr_idtetaprd",$"a.ipr_idtcom",$"a.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta",$"a.ipr_lbpayexta",$"a.ipr_steutlexta",$"a.ipr_voibpextb",$"a.ipr_comextb",$"a.ipr_codptlcomextb",$"a.ipr_lbpayextb",$"a.ipr_steutlextb",$"b.tie_raiscltie",$"b.tie_sirtie",$"b.tie_codptlcomtie",$"a.ipr_datmescom",$"a.gar_lbcodgar",$"a.gar_idtcodgar",$"b.tie_voibptie",$"b.tie_cmpvoitie",$"b.tie_comtie",$"b.tie_lbpaytie") */
+println("/***************/"+join_5_out.count()+"/***************/")
+
+/* Concatenated */
+val getConcatenated = udf((a: String, b: String, c: String, d: String, e: String) => { a + ' ' + b + ' ' + c + ' ' + d + ' ' + e  } )
+val join_5_out_1 = join_5_out.withColumn("tie_addresstie",getConcatenated($"tie_voibptie",$"tie_cmpvoitie",$"tie_codptlcomtie",$"tie_comtie",$"tie_lbpaytie")).select("eds_idteds","eds_lbapteds","eds_nomcrteds","isr_idtsoures","isr_datdebimgsoures","isr_datfinimgsoures","tie_idttie","ipr_datdebimgprd","ipr_datfinimgprd","ipr_idtetaprd","ipr_idtcom","ipr_lbtypprd","ipr_voibpexta","ipr_comexta","ipr_codptlcomexta","ipr_lbpayexta","ipr_steutlexta","ipr_voibpextb","ipr_comextb","ipr_codptlcomextb","ipr_lbpayextb","ipr_steutlextb","tie_raiscltie","tie_sirtie","tie_addresstie","tie_codptlcomtie","ipr_datmescom","gar_lbcodgar","gar_lbplghor")
+/*val join_5_out_1 = join_5_out.withColumn("tie_addresstie",getConcatenated($"tie_voibptie",$"tie_cmpvoitie",$"tie_codptlcomtie",$"tie_comtie",$"tie_lbpaytie")).select("eds_idteds","eds_lbapteds","eds_nomcrteds","isr_idtsoures","isr_datdebimgsoures","isr_datfinimgsoures","tie_idttie","ipr_datdebimgprd","ipr_datfinimgprd","ipr_idtetaprd","ipr_idtcom","ipr_lbtypprd","ipr_voibpexta","ipr_comexta","ipr_codptlcomexta","ipr_lbpayexta","ipr_steutlexta","ipr_voibpextb","ipr_comextb","ipr_codptlcomextb","ipr_lbpayextb","ipr_steutlextb","tie_raiscltie","tie_sirtie","tie_addresstie","tie_codptlcomtie","ipr_datmescom","gar_lbcodgar","gar_idtcodgar") */
+println("/***************/"+join_5_out_1.count()+"/***************/")
+join_5_out_1.write.format("com.databricks.spark.csv").option("delimiter", ";").save(prop.getString("dev.output_sub_graph_1"))
+
+
+sc.stop()
+}
+}
+/*
+    def emptyValueSubstitution = udf[String, String] {
+      case "" => "null"
+      case null => "null"
+      case value => value
+    }
+    val df = df1.withColumn("category", emptyValueSubstitution( df1("category")) )
+*/
+

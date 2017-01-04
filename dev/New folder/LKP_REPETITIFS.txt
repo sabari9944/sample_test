@@ -1,0 +1,11 @@
+******************* Lookup logic *********************
+val < need to read the PN_TICKETS_ENRICHIS hive >
+
+PN_TICKETS_ENRICHIS.registerTempTable("PN_TICKETS_ENRICHIS")
+val LKP_REPETITIFS = sqlContext.sql("SELECT ce_id, category, subcategory, count(*) as nb_repetitions from
+  (SELECT distinct num_ticket, ce_id, category, subcategory  from PN_TICKETS_ENRICHIS where is_gtrisable='Oui'AND date_debut_ticket > add_months (date_debut_ticket, -1) AND ce_id is not null)
+  group by ce_id, category, subcategory having count(*) > 1")
+LKP_REPETITIFS.count()
+
+
+********************************************************

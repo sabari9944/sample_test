@@ -1,0 +1,14 @@
+<assembly>
+<id>repository-tree</id>
+<formats>
+    <format>dir</format>
+</formats>
+<includeBaseDirectory>false</includeBaseDirectory>
+<repositories>
+    <repository>
+	<outputDirectory>repo</outputDirectory>
+        <scope>test</scope>
+        <includeMetadata>true</includeMetadata>
+    </repository>
+</repositories>
+</assembly>

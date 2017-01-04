@@ -1,0 +1,74 @@
+package com.obs.pn.ticketenrichi.acq.lkprepetitif
+
+import org.apache.spark.sql.DataFrame
+import com.obs.pn.acq.Acquisition
+import com.obs.pn.commons.Utils
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
+import Utils.sqlContext.implicits._
+import java.text.SimpleDateFormat
+import java.sql.Timestamp
+import com.obs.pn.ticketenrichi.transf.Store
+import org.slf4j.LoggerFactory
+
+object LKPRepetitif {
+    
+  /** logger */
+  val logger = LoggerFactory.getLogger(LKPRepetitif.getClass)
+  
+  /**
+   * Load Record from previous day
+   * @return Dataframe 
+   */
+  def interMediateloadFile(): DataFrame = {
+    logger.debug(" interMediateloadFile")
+    if (Utils.prop.getString("dev.initialRun").equals("TRUE")){
+      Acquisition.loadFile("dev.intermediate_pn_ticket_enriche", false)
+    }
+    else
+    {
+      Acquisition.loadFile("dev.intermediate_pn_ticket_enriche", true)
+    }
+    }
+
+  /**
+   * Load File For Look Replicate
+   * using the acquisition fonction in the commune jar
+   */
+  def operationalLoadFile(): DataFrame = {
+    logger.debug(" loading operational file")
+	  Acquisition.loadFile("dev.intermediate_operational", false)
+  }
+
+  /**
+   * Transformation using lookup file , to fill "oui" or "non"
+   * @param dataFrame dataframe to create the nbrepetetif file
+   * @return 
+   */
+   
+  def transform(dataFrame: DataFrame): DataFrame = {
+    logger.debug("transform")    
+    dataFrame.withColumn("is_repetitif", when(($"nb_repetitions".isNotNull) || ($"nb_repetitions" !== "") || ($"nb_repetitions" !== "null"), "oui").otherwise("non")).drop("nb_repetitions")
+  }
+ 
+  /**
+   * Tranformation to generate Lookup File from previous day file
+   * This file will be use for transformation
+   * @return optLoadGroup DataFrame which is used as a LookUp File on which further transformation is performed.
+   */
+  def lookReplicate(): DataFrame = {
+    logger.debug(" lookReplicate")
+    val interimLoad = interMediateloadFile()
+    Store.interimMediateStore(interimLoad)
+    val operationalLoad = operationalLoadFile()
+    val optLoadCol = operationalLoad.withColumn("date_debut_ticket", $"date_debut_ticket".cast("string"))
+    val optLoadColMonth = optLoadCol.withColumn("date_debut_ticket_result", add_months(Utils.getTimestamp(($"date_debut_ticket")), -1))
+    val optLoadFilter = optLoadColMonth.filter($"is_gtrisable" === "Oui")
+      .filter(($"ce_id".isNotNull) || ($"ce_id" !== "") ||  ($"ce_id" !== null) ||  ($"ce_id" !== "null"))
+      .filter((Utils.getTimestamp($"date_debut_ticket")).gt($"date_debut_ticket_result"))
+    val optLoadDist = optLoadFilter.select("num_ticket", "ce_id", "category", "subcategory").distinct
+    val optLoadGroup = optLoadDist.select("ce_id", "category", "subcategory").groupBy("ce_id", "category", "subcategory").count().withColumnRenamed("count","nb_repetitions")
+    optLoadGroup.filter($"nb_repetitions".gt("1"))
+  }
+
+}

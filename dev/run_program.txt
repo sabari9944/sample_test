@@ -1,0 +1,92 @@
+
+val BR_EDS = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_EDS.csv")
+val BR_GAR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_GAR.csv")
+val BR_HPR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_HPR.csv")
+val BR_HPR_1 = BR_HPR.selectExpr("cast(ipr_datdebimgprd as date) as ipr_datdebimgprd" , "cast(ipr_datfinimgprd as date) as ipr_datfinimgprd", "isr_idtsoures", "ipr_idtetaprd", "ipr_idtcom", "cast(ipr_idtprd as string) as ipr_idtprd","ipr_lbtypprd" )
+val BR_IPR2 = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_IPR2.csv")
+val tostring = udf[String, Int]( _.toString)
+val BR_IPR2_1 = BR_IPR2.withColumn("ipr_idtprd", tostring(BR_IPR2("ipr_idtprd")))
+val BR_ISR = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_ISR.csv")
+val BR_TIE = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/BR_TIE.csv")
+val BR_TIE_1 = BR_TIE.selectExpr("tie_idttie","tie_raiscltie","tie_sirtie","tie_voibptie","tie_cmpvoitie","tie_codptlcomtie","tie_comtie","tie_lbpaytie")
+val join_1 = BR_EDS.as('a).join(BR_ISR.as('b), BR_EDS("eds_idteds") === BR_ISR("eds_idteds"),"left_outer")
+val join_1_out = join_1.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds",$"b.isr_idtsoures",$"b.isr_datdebimgsoures",$"b.isr_datfinimgsoures",$"b.tie_idttie").withColumn("isr_idtsoures", when($"b.isr_idtsoures" === "", "null").otherwise($"b.isr_idtsoures")).withColumn("tie_idttie", when($"b.tie_idttie" === "", "null").otherwise($"b.tie_idttie"))
+val join_2 = BR_IPR2_1.as('a).join(BR_HPR_1.as('b),BR_IPR2_1("ipr_idtprd") === BR_HPR_1("ipr_idtprd"),"inner")
+val join_2_out = join_2.select($"b.ipr_datdebimgprd",$"b.ipr_datfinimgprd",$"b.isr_idtsoures",$"b.ipr_idtetaprd",$"b.ipr_idtcom",$"b.ipr_idtprd",$"b.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta", $"a.ipr_lbpayexta", $"a.ipr_steutlexta", $"a.ipr_voibpextb",$"a.ipr_comextb", $"a.ipr_codptlcomextb", $"a.ipr_lbpayextb", $"a.ipr_steutlextb", $"a.ipr_datmescom" ).filter($"ipr_idtetaprd" === "PARC PARTIEL" || $"ipr_idtetaprd" === "PARC TOTAL" || $"ipr_idtetaprd" === "CARNET" || $"ipr_idtetaprd" === "EN COURS").filter($"ipr_lbtypprd" !== "" )
+val join_3 = join_2_out.as('a).join(BR_GAR.as('b),join_2_out("ipr_idtprd") === BR_GAR("ipr_idtprd"),"left_outer")
+val join_3_out = join_3.select($"a.ipr_datdebimgprd",$"a.ipr_datfinimgprd",$"a.isr_idtsoures",$"a.ipr_idtetaprd",$"a.ipr_idtcom",$"a.ipr_idtprd",$"a.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta",$"a.ipr_lbpayexta",$"a.ipr_steutlexta",$"a.ipr_voibpextb",$"a.ipr_comextb",$"a.ipr_codptlcomextb",$"a.ipr_lbpayextb",$"a.ipr_steutlextb",$"a.ipr_datmescom",$"b.gar_lbcodgar",$"b.gar_lbplghor")
+val join_4 = join_1_out.as('a).join(join_3_out.as('b),join_1_out("isr_idtsoures") === join_3_out("isr_idtsoures"),"inner")
+val join_4_out = join_4.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds" ,$"a.isr_idtsoures",$"a.isr_datdebimgsoures",$"a.isr_datfinimgsoures",$"a.tie_idttie" ,$"b.ipr_datdebimgprd",$"b.ipr_datfinimgprd",$"b.ipr_idtetaprd",$"b.ipr_idtcom",$"b.ipr_lbtypprd",$"b.ipr_voibpexta",$"b.ipr_comexta",$"b.ipr_codptlcomexta",$"b.ipr_lbpayexta",$"b.ipr_steutlexta",$"b.ipr_voibpextb",$"b.ipr_comextb",$"b.ipr_codptlcomextb",$"b.ipr_lbpayextb",$"b.ipr_steutlextb",$"b.ipr_datmescom",$"b.gar_lbcodgar",$"b.gar_lbplghor")
+val join_5 = join_4_out.as('a).join(BR_TIE_1.as('b),join_4_out("tie_idttie") === BR_TIE_1("tie_idttie"),"inner")
+val join_5_out =join_5.select($"a.eds_idteds",$"a.eds_lbapteds",$"a.eds_nomcrteds",$"a.isr_idtsoures",$"a.isr_datdebimgsoures",$"a.isr_datfinimgsoures",$"a.tie_idttie",$"a.ipr_datdebimgprd",$"a.ipr_datfinimgprd",$"a.ipr_idtetaprd",$"a.ipr_idtcom",$"a.ipr_lbtypprd",$"a.ipr_voibpexta",$"a.ipr_comexta",$"a.ipr_codptlcomexta",$"a.ipr_lbpayexta",$"a.ipr_steutlexta",$"a.ipr_voibpextb",$"a.ipr_comextb",$"a.ipr_codptlcomextb",$"a.ipr_lbpayextb",$"a.ipr_steutlextb",$"b.tie_raiscltie",$"b.tie_sirtie",$"b.tie_codptlcomtie",$"a.ipr_datmescom",$"a.gar_lbcodgar",$"a.gar_lbplghor",$"b.tie_voibptie",$"b.tie_cmpvoitie",$"b.tie_comtie",$"b.tie_lbpaytie")
+val getConcatenated = udf((a: String, b: String, c: String, d: String, e: String) => if ( a != "" && b != "" && c != "" && d != "" && e != "" )( a + ' ' + b + ' ' + c + ' ' + d + '(' + e + ')' )else null)
+val join_5_out_1 = join_5_out.withColumn("tie_addresstie",getConcatenated($"tie_voibptie",$"tie_cmpvoitie",$"tie_codptlcomtie",$"tie_comtie",$"tie_lbpaytie")).select("eds_idteds","eds_lbapteds","eds_nomcrteds","isr_idtsoures","isr_datdebimgsoures","isr_datfinimgsoures","tie_idttie","ipr_datdebimgprd","ipr_datfinimgprd","ipr_idtetaprd","ipr_idtcom","ipr_lbtypprd","ipr_voibpexta","ipr_comexta","ipr_codptlcomexta","ipr_lbpayexta","ipr_steutlexta","ipr_voibpextb","ipr_comextb","ipr_codptlcomextb","ipr_lbpayextb","ipr_steutlextb","tie_raiscltie","tie_sirtie","tie_addresstie","tie_codptlcomtie","ipr_datmescom","gar_lbcodgar","gar_lbplghor")
+val sub_graph_1_output = join_5_out_1
+/* ***************************** */
+/*
+sub_graph_1_output.count()
+1278586  --> 1278586
+val Key = Window.partitionBy($"ipr_idtcom")
+val sub_graph_1_output_1 = sub_graph_1_output.select($"*", rowNumber.over(Key).alias("rn")).where($"rn" === 1)
+sub_graph_1_output_1.count()
+587726
+*/
+/* ************************* sub_graph_3 ******************* */
+case class schema(nom_commune: String, poulation_tot: String, code_insee: String, nom_commune_caps: String, code_postal: String, nom_commune_caps2: String)
+val sub_graph_1 = join_5_out_1
+def correct_code_postal(s:String): String =
+  {
+    if(s!=null && s.length()==5) s
+    else if(s!=null && s.length()==4) "0".concat(s)
+    else s
+  }  
+def correct_nom_commune(s:String):String =
+  {
+    val result = s.replace("-", " ")
+    result
+  }
+val communes = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/communes_INSEE_utile.csv")
+val correspondance = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/correspondance-code-insee-code-postal_utile.csv")
+import sqlContext.implicits._ 
+val insee = communes.as('a).join(correspondance.as('b), $"a.code_insee" === $"b.Code_INSEE","inner")
+val insee_out = insee.select($"a.nom_commune",$"a.poulation_tot",$"a.code_insee",$"a.nom_commune_caps",$"b.Code_Postal",$"b.Commune")
+val insee_out_df= insee_out.map(x => {schema(x(0).toString,x(1).toString,x(2).toString,x(3).toString,correct_code_postal(x(4).toString),correct_nom_commune(x(5).toString))}).toDF
+val allrap_out = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").option("parserLib", "univocity").load("/obs/data/intermediate/sub_graph_2_output")
+val allrap_join_insee = allrap_out.as('a).join(insee_out_df.as('b),allrap_out("cp_extremite_A") === insee_out_df("code_postal") && allrap_out("ville_extremite_A") === insee_out_df("nom_commune_caps2") ,"left_outer").drop(allrap_out("population"))
+val allrap_join_insee_select = allrap_join_insee.select($"a.*",$"b.poulation_tot")
+val allrap_join_insee_output = allrap_join_insee_select.withColumnRenamed("poulation_tot", "population") 
+val df_incidentologie_wasac_iai = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("parserLib", "univocity").option("header", "true").option("inferSchema", "true").load("file:///obs/data/raw/incidentologie_wasac_iai.csv")
+val df_wasac_iai = df_incidentologie_wasac_iai.select("*").withColumn("fk_num_test",when($"fk_num_test".isNull or $"fk_num_test" === "", 0).otherwise($"fk_num_test")).withColumn("resultat_test",when($"resultat_test".isNull or $"resultat_test" === "", "null").otherwise($"resultat_test"))  
+val df_wasac_iai_ios= df_wasac_iai.filter($"fk_num_test" === 9 && $"resultat_test" === "OK")
+val df_wasac_iai_replace= df_wasac_iai_ios.na.replace("message",Map("\n" -> "")).withColumnRenamed("message", "ios_version_from_iai")
+val df_wasac_iai_rollup=df_wasac_iai_replace.groupBy("feuillet").agg(max("date_res").alias("date_res"))
+val df_wasac_iai_join= df_wasac_iai_replace.as('a).join(df_wasac_iai_rollup.as('b), $"a.feuillet" === $"b.feuillet" && $"a.date_res"===$"b.date_res","inner")
+val df_wasac_join_ios = df_wasac_iai_join.select($"a.*").drop("ticketid")
+def suffix(s:String): String =
+  {
+  if(s!=null ) s.takeRight(1) else null  
+  }     
+val df_wasac_nb = df_incidentologie_wasac_iai.select("*").withColumn("fk_num_test",when($"fk_num_test".isNull or $"fk_num_test" === "", 0).otherwise($"fk_num_test")).withColumn("resultat_test",when($"resultat_test".isNull or $"resultat_test" === "", "null").otherwise($"resultat_test"))
+val df_wasac_filter_nb= df_wasac_nb.filter($"fk_num_test"===60 && $"resultat_test" === "OK")  
+val df_wasac_suffix=df_wasac_filter_nb.withColumn("message", when($"message" !== "", $"message".toString().takeRight(1)).otherwise($"message")).withColumnRenamed("message", "nb_paires")
+val df_wasac_rollup_nb_paires = df_wasac_suffix.groupBy("feuillet").agg(max("date_res").alias("date_res"))
+val df_wasac_join_nb= df_wasac_rollup_nb_paires.as('a).join(df_wasac_suffix.as('b), $"a.feuillet" === $"b.feuillet" && $"a.date_res"===$"b.date_res","inner")
+val df_wasac_join_nb_paires = df_wasac_join_nb.select($"b.*").drop("ticketid")
+val ios_join = allrap_join_insee_output.as('a).join(df_wasac_join_ios.as('b), allrap_join_insee_output("identifiant_1_produit") === df_wasac_join_ios("feuillet"),"left_outer").drop(allrap_join_insee_output("ios_version_from_iai"))
+val ios_join_output = ios_join.select($"a.*",$"b.ios_version_from_iai") 
+val nb_paires_join = ios_join_output.as('a).join(df_wasac_join_nb_paires.as('b), ios_join_output("identifiant_1_produit") === df_wasac_join_nb_paires("feuillet"),"left_outer").drop(ios_join_output("nb_paires"))
+val nb_paires_join_out = nb_paires_join.select($"a.*",$"b.nb_paires")
+val final_join = sub_graph_1.as('a).join(nb_paires_join_out.as('b),sub_graph_1("ipr_idtcom") === nb_paires_join_out("identifiant_1_produit"),"left_outer")
+val final_join_output = final_join.select($"a.ipr_idtcom",$"a.eds_idteds",$"a.ipr_idtetaprd",$"b.rap",$"b.libelle_rap",$"a.ipr_lbtypprd",$"a.ipr_datmescom",$"b.ce_id",$"b.connexion_id",$"b.support_id",$"b.service_support",$"b.collect",$"b.support",$"b.nb_paires",$"b.collect_role",$"b.router_role",$"a.gar_lbcodgar",$"a.gar_lbplghor",$"a.tie_raiscltie",$"a.tie_addresstie",$"a.tie_codptlcomtie",$"a.tie_sirtie",$"a.ipr_steutlexta",$"a.ipr_comexta",$"a.ipr_voibpexta",$"a.ipr_codptlcomexta",$"a.ipr_steutlextb",$"a.ipr_comextb",$"a.ipr_voibpextb",$"a.ipr_codptlcomextb",$"b.population",$"b.population_cat",$"b.constructeur",$"b.chassis",$"b.ios_version",$"b.ios_version_from_iai",$"b.ip_admin",$"b.rsc",$"b.version_boot",$"b.dslam_id",$"b.master_dslam_id",$"b.nortel_id",$"b.pe_id",$"b.fav_id",$"b.ntu_id",$"b.tronc_type",$"b.num_pivot",$"b.element_reseau",$"b.type_interne")
+val final_join_output_rename = final_join_output.withColumnRenamed("ipr_idtcom", "identifiant_1_produit").withColumnRenamed("eds_idteds", "identifiant_eds_pilote").withColumnRenamed("ipr_idtetaprd", "etat_produit").withColumnRenamed("ipr_lbtypprd","type_produit").withColumnRenamed("tie_raiscltie", "raison_sociale").withColumnRenamed("tie_sirtie", "siren").withColumnRenamed("ipr_voibpexta", "voie_extremite_A").withColumnRenamed("ipr_codptlcomexta", "cp_extremite_A").withColumnRenamed("ipr_comexta", "ville_extremite_A").withColumnRenamed("ipr_steutlexta", "societe_extremite_A").withColumnRenamed("ipr_steutlextb", "societe_extremite_B").withColumnRenamed("ipr_comextb", "ville_extremite_B").withColumnRenamed("ipr_voibpextb", "voie_extremite_B").withColumnRenamed("ipr_codptlcomextb", "cp_extremite_B").withColumnRenamed("gar_lbcodgar", "gtr").withColumnRenamed("gar_lbplghor", "plage_horaire_gtr").withColumnRenamed("tie_addresstie", "addresse_complete_client").withColumnRenamed("tie_codptlcomtie", "code_postal_client").withColumn("date_photo", current_date())
+val final_join_output_sort = final_join_output_rename.orderBy("identifiant_1_produit")
+val Key = Window.partitionBy($"identifiant_1_produit")
+val PN_PARC_MARINE_remove_duplicate = final_join_output_sort.select($"*", rowNumber.over(Key).alias("rn"))
+val Key_1 = Window.partitionBy($"identifiant_1_produit").orderBy(desc("rn"))
+val PN_PARC_MARINE_remove_duplicate_1 = PN_PARC_MARINE_remove_duplicate.select($"*", rowNumber.over(Key_1).alias("rn_1")).where($"rn_1" === 1).drop("rn").drop("rn_1")
+val PN_PARC_MARINE = PN_PARC_MARINE_remove_duplicate_1
+PN_PARC_MARINE.write.mode(SaveMode.Overwrite).parquet("/obs/data/hive/PN_PARC_MARINE2/test_par")
+/* ***** 587726 **** */
+
+
+

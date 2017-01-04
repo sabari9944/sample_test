@@ -1,0 +1,3 @@
+version_number = ${project.version}
+build date = ${pn-timestamp}
+build_number = ${pn-build-number}

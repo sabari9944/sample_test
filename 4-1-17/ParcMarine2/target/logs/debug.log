@@ -1,0 +1,76 @@
+2017-01-03 16:47:23 INFO  DummyLogger$:23 -  configurationFilePath = /D:/workspace/OBS_PN_Common/ParcMarine2/target/test-classes/
+2017-01-03 16:47:23 INFO  DummyLogger$:24 - *** BEFORE TEST ***
+2017-01-03 16:47:23 INFO  DummyLogger$:28 - This is a Windows environment
+2017-01-03 16:47:23 INFO  Utils$:29 - ### LOADING UTILS CLASS / SPARK / HIVE ###
+2017-01-03 16:47:23 DEBUG Utils$:37 - ### LOADING LOCAL CONFIG ###
+2017-01-03 16:47:23 DEBUG Utils$:70 - ### LOADING CONFIG FROM LOCAL ###
+2017-01-03 16:47:23 DEBUG Utils$:73 - ### local = D:\workspace\OBS_PN_Common\ParcMarine2\target\test-classes\..\..\..\application_dev.conf
+2017-01-03 16:47:23 DEBUG Utils$:75 - loading local config
+2017-01-03 16:47:23 DEBUG Utils$:45 - ### LOADING DEFAULT CONFIG ###
+2017-01-03 16:47:23 DEBUG Utils$:48 - ### SET SPARK LOCAL MODE ###
+2017-01-03 16:47:24 WARN  NativeCodeLoader:62 - Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2017-01-03 16:47:25 WARN  MetricsSystem:71 - Using default name DAGScheduler for source because spark.app.id is not set.
+2017-01-03 16:47:25 DEBUG Utils$:54 - ### CREATE SPARK CONTEXT ###
+2017-01-03 16:47:43 WARN  ObjectStore:6666 - Version information not found in metastore. hive.metastore.schema.verification is not enabled so recording the schema version 1.2.0
+2017-01-03 16:47:44 WARN  ObjectStore:568 - Failed to get database default, returning NoSuchObjectException
+2017-01-03 16:47:44 WARN  :139 - Your hostname, DIN35003131 resolves to a loopback/non-reachable address: fe80:0:0:0:0:5efe:a4c:45e9%net4, but we couldn't find any external IP address!
+2017-01-03 16:47:48 WARN  NativeCodeLoader:62 - Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+2017-01-03 16:48:06 WARN  ObjectStore:6666 - Version information not found in metastore. hive.metastore.schema.verification is not enabled so recording the schema version 1.2.0
+2017-01-03 16:48:07 WARN  ObjectStore:568 - Failed to get database default, returning NoSuchObjectException
+2017-01-03 16:48:07 WARN  :139 - Your hostname, DIN35003131 resolves to a loopback/non-reachable address: fe80:0:0:0:0:5efe:a4c:45e9%net4, but we couldn't find any external IP address!
+2017-01-03 16:48:11 DEBUG Utils$:58 - ### CREATE HIVE CONTEXT ###
+2017-01-03 16:48:12 DEBUG DummyLogger$:56 - ### Start of Launcher.main() ###
+2017-01-03 16:48:12 INFO  Launcher$:33 -  RUN DATE TESTEmpty
+2017-01-03 16:48:12 INFO  SubGraph1$:28 - ############ Beggining phase 1 ############
+2017-01-03 16:48:12 DEBUG Acquisition$:86 -  Property : dev.BR_HPR
+2017-01-03 16:48:12 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/BR_HPR_TESTEmpty.csv
+2017-01-03 16:48:12 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_HPR_TESTEmpty.csv
+2017-01-03 16:48:15 DEBUG SubGraph1$:42 - adding column ipr_idtprd to BR_IPR2
+2017-01-03 16:48:15 DEBUG Acquisition$:86 -  Property : dev.BR_IPR2
+2017-01-03 16:48:15 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/BR_IPR2_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_IPR2_TESTEmpty.csv
+2017-01-03 16:48:15 DEBUG Acquisition$:86 -  Property : dev.BR_TIE
+2017-01-03 16:48:15 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/BR_TIE_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_TIE_TESTEmpty.csv
+2017-01-03 16:48:15 DEBUG Acquisition$:86 -  Property : dev.BR_EDS
+2017-01-03 16:48:15 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/BR_EDS_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_EDS_TESTEmpty.csv
+2017-01-03 16:48:15 DEBUG Acquisition$:86 -  Property : dev.BR_ISR
+2017-01-03 16:48:15 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/BR_ISR_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_ISR_TESTEmpty.csv
+2017-01-03 16:48:15 DEBUG Acquisition$:86 -  Property : dev.BR_GAR
+2017-01-03 16:48:15 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/BR_GAR_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_GAR_TESTEmpty.csv
+2017-01-03 16:48:16 INFO  SubGraph1$:111 - ############ Ending phase 1 ############
+2017-01-03 16:48:16 INFO  SubGraph2$:34 - ############ Beggining phase 2 ############
+2017-01-03 16:48:16 INFO  SubGraph2$:39 - loading TIMESTAMP ACORT
+2017-01-03 16:48:16 DEBUG Acquisition$:86 -  Property : dev.acort
+2017-01-03 16:48:16 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/acort_TESTEmpty.csv
+2017-01-03 16:48:16 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/acort_TESTEmpty.csv
+2017-01-03 16:48:16 DEBUG Acquisition$:86 -  Property : dev.incidentologie_wasac
+2017-01-03 16:48:16 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/incidentologie_wasac_TESTEmpty.csv
+2017-01-03 16:48:16 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/incidentologie_wasac_TESTEmpty.csv
+2017-01-03 16:48:18 INFO  Utils$:316 - addBlankCols3 transformation completed successfully
+2017-01-03 16:48:18 INFO  Utils$:343 - changeIOSField transformation completed successfully
+2017-01-03 16:48:18 INFO  Utils$:343 - changeIOSField transformation completed successfully
+2017-01-03 16:48:18 DEBUG Acquisition$:97 -  Property : dev.AllRapReference
+2017-01-03 16:48:18 DEBUG Acquisition$:99 -  Filename : ../../src/test/ressources/referential/AllRapReference.csv
+2017-01-03 16:48:18 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/referential/AllRapReference.csv
+2017-01-03 16:48:18 INFO  Utils$:259 - addSupport transformation completed successfully
+2017-01-03 16:48:18 INFO  SubGraph2$:224 - ############ Ending phase 2 ############
+2017-01-03 16:48:18 INFO  SubGraph3$:28 - ############ Beggining phase 3 ############
+2017-01-03 16:48:18 DEBUG Acquisition$:97 -  Property : dev.communes_INSEE_utile
+2017-01-03 16:48:18 DEBUG Acquisition$:99 -  Filename : ../../src/test/ressources/referential/communes_INSEE_utile.csv
+2017-01-03 16:48:18 INFO  SubGraph3$:54 - DELIMITER LOADED
+2017-01-03 16:48:18 DEBUG Acquisition$:97 -  Property : dev.correspondance-code-insee-code-postal_utile
+2017-01-03 16:48:18 DEBUG Acquisition$:99 -  Filename : ../../src/test/ressources/referential/correspondance-code-insee-code-postal_utile.csv
+2017-01-03 16:48:20 DEBUG Acquisition$:86 -  Property : dev.incidentologie_wasac_iai
+2017-01-03 16:48:20 DEBUG Acquisition$:88 -  Filename : ../../src/test/ressources/dataset1_TESTEmpty/incidentologie_wasac_iai_TESTEmpty.csv
+2017-01-03 16:48:21 INFO  SubGraph3$:188 - Writing .CSV file for hive...
+2017-01-03 16:48:21 DEBUG Acquisition$:97 -  Property : dev.hive_pn_parc_marine2
+2017-01-03 16:48:21 DEBUG Acquisition$:99 -  Filename : ../../target/pn_parc_marine2.csv
+2017-01-03 16:48:58 DEBUG Acquisition$:173 - -../../target/pn_parc_marine2.csv write completed successfully
+2017-01-03 16:48:58 INFO  SubGraph3$:190 - CSV file written
+2017-01-03 16:48:58 INFO  SubGraph3$:192 - ############ Ending phase 3 ############
+2017-01-03 16:48:58 DEBUG DummyLogger$:58 - ### End of Launcher.main() ###
+2017-01-03 16:48:58 INFO  DummyLogger$:49 - *** AFTER TEST ***

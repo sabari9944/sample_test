@@ -1,0 +1,3 @@
+version_number = G00R00C02-SNAPSHOT
+build date = 2017-01-03_11-36
+build_number = no.scm.config.in.pom

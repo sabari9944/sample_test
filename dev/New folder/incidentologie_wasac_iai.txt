@@ -1,0 +1,33 @@
+****************************************************** incidentologie_wasac_iai *****************************
+
+val wasac_iai = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/incidentologie_wasac_iai.csv_bkp")
+
+val ios_version = wasac_iai.filter($"fk_num_test" === "90" && $"resultat_test" === "OK")
+
+val ios_version_1 = ios_version.withColumn("message", when($"message" === "\n", "").otherwise($"message"))
+
+val ios_version_rollup = ios_version_1.groupBy("feuillet").agg(max("date_res").alias("date_res"))
+
+val ios_version_join = ios_version_1.as('a).join(ios_version_rollup.as('b),$"a.feuillet" === $"b.feuillet" && $"a.date_res" === $"b.date_res","inner")
+
+val ios_version_out = ios_version_join.select($"a.feuillet", $"a.date_res", $"a.validite_resu", $"a.fk_num_test", $"a.ios_version", $"a.resultat_test")
+
+val nb_paires = wasac_iai.filter($"fk_num_test" === "60" && $"resultat_test" === "OK")
+
+
+def suffix(s:String): String =
+  {
+  if(s!=null ) s.takeRight(1) else null  
+  }
+/* message change to nb_paires */
+case class schema(ticketid: String,feuillet: String, date_res: Int, validite_resu: String, fk_num_test: Int, nb_paires: String, resultat_test: String)
+
+val nb_paires_1= nb_paires.map(x => {schema(x(0).toString,x(1).toString,x(2).toInt,x(3).toString,x(4).toInt,suffix(x(5).toString),x(6).toString)}).toDF
+
+val nb_paires_rollup = nb_paires_1.groupBy("feuillet").agg(max("date_res").alias("date_res"))
+
+val nb_paires_join = nb_paires_rollup.as('a).join(nb_paires_1.as('b),$"a.feuillet" === $"b.feuillet" && $"a.date_res" === $"b.date_res","inner")
+
+val nb_paires_out = nb_paires_join.select($"b.feuillet", $"b.date_res", $"b.validite_resu", $"b.fk_num_test", $"b.nb_paires", $"b.resultat_test")
+
+*******************************************

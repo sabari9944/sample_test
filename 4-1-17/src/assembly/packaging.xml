@@ -1,0 +1,54 @@
+<assembly>
+	<id>packaging</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<files>
+		<file>
+		<!-- This filtering does not work on parent since it's a pom, so no resource goal -->
+		<!-- that is why we put in a child module -->
+			<source>CommonPN/target/classes/version.txt</source>
+			<outputDirectory>install</outputDirectory>
+		</file>
+		<file>
+			<source>CommonPN/target/pn-common-${project.version}.jar</source>
+			<outputDirectory>install/lib</outputDirectory>
+		</file>
+		<file>
+			<source>ParcMarine2/target/pn-parc-marine-${project.version}.jar
+			</source>
+			<outputDirectory>install/lib</outputDirectory>
+		</file>
+		<file>
+			<source>TicketEnrichi/target/pn-ticket-enrichi-${project.version}.jar
+			</source>
+			<outputDirectory>install/lib</outputDirectory>
+		</file>
+	</files>
+	<fileSets>
+		<fileSet>
+			<directory>install</directory>
+			<outputDirectory>install</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>CommonPN/src</directory>
+			<outputDirectory>install/src/CommonPN/src</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>ParcMarine2/src</directory>
+			<outputDirectory>install/src/ParcMarine2/src</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>TicketEnrichi/src</directory>
+			<outputDirectory>install/src/TicketEnrichi/src</outputDirectory>
+		</fileSet>
+	</fileSets>
+	<dependencySets>
+		<dependencySet>
+			<outputDirectory>install/lib</outputDirectory>
+			<unpack>false</unpack>
+			<scope>runtime</scope>
+		</dependencySet>
+	</dependencySets>
+</assembly>

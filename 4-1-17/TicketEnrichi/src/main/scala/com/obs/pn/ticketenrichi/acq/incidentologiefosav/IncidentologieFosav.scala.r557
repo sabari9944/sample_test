@@ -1,0 +1,61 @@
+package com.obs.pn.ticketenrichi.acq.incidentologiefosav
+
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.Row
+
+object IncidentologieFosav {
+  /**
+   * This method is used to call all the methods in order based on transformation in File Incidentologie Fosav.
+   * 
+   * @param fosav The DataFrame obtained after joining fosav and wasac on which all the transformation is to be performed
+   * @return renameColumns DataFrame on which all transformations are performed
+   */
+  def transform(fosav: DataFrame): DataFrame = {
+    val repStr = replaceString(fosav)
+    val rddDF = rddToDF(fosav, repStr)
+    renameColumns(rddDF)
+  }
+
+ /**
+  * Return a RDD after the transformation.
+  * This method return an RDD after converting the Dataframe into RDD and peerforming transformation
+  * to replace the column data if it contains "\x92" with "'".
+  * 
+  * @param fosav DataFrame on which transformation is performed
+  * @return 	replacedFOSAV			RDD after replacing value in the specified column
+  */
+  def replaceString(fosav: DataFrame): RDD[Row] = {
+    val replacedFOSAV = fosav.map(row => {
+      val x = row.getAs[String](24)
+      val detail_pbm = if (x.contains("\\x92")) x.replace("\\x92", "'") else x
+      Row(row(0), row(1), row(2), row(3), row(4), row(5), row(6), row(7), row(8), row(9),
+        row(10), row(11), row(12), row(13), row(14), row(15), row(16), row(17), row(18), row(19),
+        row(20), row(21), row(22), row(23), detail_pbm, row(25), row(26), row(27), row(28), row(29),
+        row(30), row(31), row(32), row(33), row(34), row(35), row(36), row(37), row(38), row(39),
+        row(40), row(41), row(42), row(43), row(44), row(45), row(46), row(47), row(48), row(49),
+        row(50), row(51), row(52), row(53), row(54), row(55), row(56), row(57), row(58), row(59))
+    })
+     replacedFOSAV
+  }
+
+  /**
+   * Returns Dataframe from RDD
+   * In this method the RDD that is obtained is converted to DataFrame
+   * 
+   * @param fosav The Dataframe whose schema is used to convert the RDD into Dataframe
+   * @param replacedDf The RDD which is converted to Dataframe
+   * @return DataFrame
+   */
+
+  def rddToDF(fosav: DataFrame, replacedDf: RDD[Row]): DataFrame = fosav.sqlContext.createDataFrame(replacedDf, fosav.schema)
+
+  /**
+   * This method is used to rename the column 
+   * 
+   * @param fosav DataFrame in which the specified column is to be renamed
+   * @return fosav DataFrame with new Column name
+   */
+  def renameColumns(fosav: DataFrame): DataFrame = fosav.withColumnRenamed("pht_idtcom", "feuillet")
+ 
+}

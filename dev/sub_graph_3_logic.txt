@@ -1,0 +1,84 @@
+
+******************* Lookup logic *********************
+PN_TICKETS_ENRICHIS.registerTempTable("PN_TICKETS_ENRICHIS")
+val LKP_REPETITIFS = sqlContext.sql("SELECT ce_id, category, subcategory, count(*) as nb_repetitions from
+  (SELECT distinct num_ticket, ce_id, category, subcategory  from PN_TICKETS_ENRICHIS where is_gtrisable='Oui'AND date_debut_ticket > add_months (date_debut_ticket, -1) AND ce_id is not null)
+  group by ce_id, category, subcategory having count(*) > 1")
+LKP_REPETITIFS.count()
+
+
+
+******************************  INSEE  *******************************
+
+def correct_code_postal(s:String): String =
+  {
+    if(s!=null && s.length()==5) s
+    else if(s!=null && s.length()==4) "0".concat(s)
+    else s
+  }
+  
+ /* need to .replace("û", "u") */
+def correct_nom_commune(s:String):String =
+  {
+    val result = s.replace("-", " ")
+    result
+  } 
+
+val communes = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/communes_INSEE_utile.csv")
+
+val correspondance = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/correspondance-code-insee-code-postal_utile.csv")
+
+val insee = communes.as('a).join(correspondance.as('b), $"code_insee" === $"b.code_insee","inner")
+
+val insee_out = insee.select($"nom_commune",$"poulation_tot",$"code_insee",$"nom_commune_caps",$"b.code_postal",$"b.nom_commune_caps")
+
+case class schema(nom_commune: String, poulation_tot: String, code_insee: String, nom_commune_caps: String, code_postal: String, nom_commune_caps2: String)
+
+val insee_out_df= insee_out.map(x => {schema(x(0).toString,x(1).toString,x(2).toString,x(3).toString,correct_code_postal(x(4).toString),correct_nom_commune(x(5).toString))}).toDF
+
+
+insee_out_df.show()
+
+****************************************************** incidentologie_wasac_iai *****************************
+
+val wasac_iai = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/incidentologie_wasac_iai.csv")
+
+val ios_version = wasac_iai.filter($"fk_num_test" === "9" && $"resultat_test" === "OK")
+
+val ios_version_1 = ios_version.withColumn("ios_version", when($"message" === "\n", "").otherwise($"message"))
+
+val ios_version_rollup = ios_version_1.groupBy("feuillet").agg(max("date_res").alias("date_res"))
+
+val ios_version_join = ios_version_1.as('a).join(ios_version_rollup.as('b),$"feuillet" === $"b.feuillet" && $"date_res" === $"b.date_res","inner")
+
+val ios_version_out = ios_version_join.select($"feuillet", $"date_res", $"validite_resu", $"fk_num_test", $"ios_version", $"resultat_test")
+
+val nb_paires = wasac_iai.filter($"fk_num_test" === "60" && $"resultat_test" === "OK")
+
+
+def suffix(s:String): String =
+  {
+  if(s!=null ) s.takeRight(1) else null  
+  }
+/* message change to nb_paires */
+case class schema(ticketid: String,feuillet: String, date_res: Int, validite_resu: String, fk_num_test: Int, nb_paires: String, resultat_test: String)
+
+val nb_paires_1= nb_paires.map(x => {schema(x(0).toString,x(1).toString,x(2).toInt,x(3).toString,x(4).toInt,suffix(x(5).toString),x(6).toString)}).toDF
+
+val nb_paires_rollup = nb_paires_1.groupBy("feuillet").agg(max("date_res").alias("date_res"))
+
+val nb_paires_out = nb_paires_rollup.as('a).join(nb_paires_1.as('b),$"feuillet" === $"b.feuillet" && $"date_res" === $"b.date_res","inner")
+
+val ios_version_out = ios_version_join.select($"b.feuillet", $"b.date_res", $"b.validite_resu", $"b.fk_num_test", $"b.nb_paires", $"b.resultat_test")
+
+***************************************************************
+
+
+
+val aaaaa = correspondance.groupBy("code_insee").agg(max("code_postal").alias("code_postal"))
+
+val cccc = communes.selectExpr(("nom_commune.takeRight(2)")
+
+val bbb = correspondance.as('a).join(aaaaas('b),$"code_insee" === $"b.code_insee" && $"code_postal" === $"b.code_postal","inner")
+
+val ffff= insee_out.map(x => {schema(suffix(x(0).toString),x(1).toString,x(2).toString,x(3).toString,correct_code_postal(x(4).toString),correct_nom_commune(x(5).toString))}).toDF

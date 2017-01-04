@@ -1,0 +1,84 @@
+val date = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/date.csv")
++--------------+
+|          date|
++--------------+
+|20160902084700|
++--------------+
+
+
+val date_cast = date.selectExpr("cast(date as string) as date_cast")
+
++--------------+
+|     date_cast|
++--------------+
+|20160902084700|
++--------------+
+
+
+
+val date_1 = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/date_1.csv")
+
+
+
+import javutil.Calendar
+import javtext.SimpleDateFormat
+import javsql.Timestamp
+
+def getTimestamp(s:String): javsql.Timestamp =
+  {
+  val format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss")
+   if (s.toString() == "")return null 
+    else
+      {
+      val d = format.parse(s.toString());val t = new Timestamp(d.getTime()); return t 
+      }
+  }
+  
+  val date = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/date.csv")
+  val date_cast = date.selectExpr("cast(date as string) as date_cast")
+  val time = date.selectExpr("cast(date as timestamp) as date_cast") // not working
+  val time = date.selectExpr("cast(date as date) as date_cast") //  not working
+ 
+  val date_output = date_cast.map(date_cast => date_cast(getTimestamp(date_cast(0))))
+  
+
+
+	datediff(Column end, Column start)
+Returns the number of days from start to end.
+  
+val date_format = new SimpleDateFormat("YYYYMMdd")
+println(date_format.format(Calendar.getInstance().getTime()))
+
+public static Column datediff(Column end,
+              Column start)
+Returns the number of days from start to end.
+Parameters:
+end - (undocumented)
+start - (undocumented)
+Returns:
+(undocumented)
+Since:
+1.5.0
+
+
+20160902084700   -->  2608-11-15 19:34:...
+
+val date_diff = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/date_diff.csv")
+
+val diff_secs_col = col("start_date").cast("long") - col("End_date").cast("long")
+
+import org.apache.spark.sql.functions._
+val diff_secs_col = col("ts1").cast("long") - col("ts2").cast("long")
+
+
+
+val df2 = df1
+  .withColumn( "diff_secs", diff_secs_col )
+  .withColumn( "diff_mins", diff_secs_col / 60D )
+  .withColumn( "diff_hrs",  diff_secs_col / 3600D )
+  .withColumn( "diff_days", diff_secs_col / (24D * 3600D) )
+  
+
+  
+  val df2 = date_diff.withColumn("time", datediff(date_diff("End_date"), date_diff("start_date")))
+  

@@ -1,0 +1,34 @@
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.SparkConf
+import org.apache.spark.rdd.RDD
+object sample {
+def main(args: Array[String]) {
+val conf = new SparkConf().setAppName("appName").setMaster("master")
+val sc = new SparkContext(conf)
+
+def ios(s:String):String =
+  {
+    val result = s.replace("/n","")
+    result
+  } 
+
+val wasac=sc.textFile("/obs/data/src/INCIDENTOLOGIE_WASAC/wasac.csv")
+//val wasacmap=wasac.map( x=> (x.split(";")(0),x))
+val wasacmap=wasac.map(x => x.split(";")).map(x => ((x(0))->(x(0),x(1),x(2),ios(x(3)),x(4),x(5),x(6),x(7))))
+val acort=sc.textFile("/obs/data/src/ACORT/acort_1.csv")
+val acortmap=acort.map(x => x.split(";")).map(x => ((x(1))->(x(0),x(1),x(2))))
+val acortjoin=wasacmap.leftOuterJoin(acortmap)
+
+/// output //
+res21: Array[(String, ((String, String, String, String, String, String, String, String), Option[(String, String, String)]))] = Array(("TE5435FWJ6",(("TE5435FWJ6","98.100.125.515","GHN67","MUOFW28-XPDA_XJN_26L_WQ-J2.8F8Y00_UM4","XBFVAJRCG","GHN67","FXDBDMB YTDVPDJ","JUUX49-JCY-D9.8Y1W28"),Some(("T_12518","TE5435FWJ6","_")))))
+
+
+**** filter need to done on T_12518 what to do ?
+how to point the corresponding filed
+
+
+
+
+  }
+}

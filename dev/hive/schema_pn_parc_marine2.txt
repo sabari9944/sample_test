@@ -1,0 +1,60 @@
+hive> describe pn_parc_marine2;
+OK
+identifiant_1_produit   string
+identifiant_eds_pilote  string
+etat_produit            string
+rap                     string
+libelle_rap             string
+type_produit            string
+ipr_datmescom           date
+ce_id                   string
+connexion_id            string
+support_id              string
+service_support         string
+collect                 string
+support                 string
+nb_paires               string
+collect_role            string
+router_role             string
+gtr                     string
+plage_horaire_gtr       string
+raison_sociale          string
+addresse_complete_client        string
+code_postal_client      string
+siren                   string
+societe_extremite_a     string
+ville_extremite_a       string
+voie_extremite_a        string
+cp_extremite_a          string
+societe_extremite_b     string
+ville_extremite_b       string
+voie_extremite_b        string
+cp_extremite_b          string
+population              string
+population_cat          string
+constructeur            string
+chassis                 string
+ios_version             string
+ios_version_from_iai    string
+ip_admin                string
+rsc                     string
+version_boot            string
+dslam_id                string
+master_dslam_id         string
+nortel_id               string
+pe_id                   string
+fav_id                  string
+ntu_id                  string
+tronc_type              string
+category                string
+num_pivot               string
+element_reseau          string
+type_interne            string
+date_photo              date
+
+# Partition Information
+# col_name              data_type               comment
+
+date_photo              date
+Time taken: 0.481 seconds, Fetched: 56 row(s)
+hive>

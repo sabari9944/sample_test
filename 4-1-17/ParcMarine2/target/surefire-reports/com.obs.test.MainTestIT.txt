@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.obs.test.MainTestIT
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 95.121 sec - in com.obs.test.MainTestIT

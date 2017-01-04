@@ -1,0 +1,25 @@
+2017-01-03 16:47:23 INFO  Utils$:29 - ### LOADING UTILS CLASS / SPARK / HIVE ###
+2017-01-03 16:48:12 INFO  Launcher$:33 -  RUN DATE TESTEmpty
+2017-01-03 16:48:12 INFO  SubGraph1$:28 - ############ Beggining phase 1 ############
+2017-01-03 16:48:12 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_HPR_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_IPR2_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_TIE_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_EDS_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_ISR_TESTEmpty.csv
+2017-01-03 16:48:15 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/BR_GAR_TESTEmpty.csv
+2017-01-03 16:48:16 INFO  SubGraph1$:111 - ############ Ending phase 1 ############
+2017-01-03 16:48:16 INFO  SubGraph2$:34 - ############ Beggining phase 2 ############
+2017-01-03 16:48:16 INFO  SubGraph2$:39 - loading TIMESTAMP ACORT
+2017-01-03 16:48:16 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/acort_TESTEmpty.csv
+2017-01-03 16:48:16 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/dataset1_TESTEmpty/incidentologie_wasac_TESTEmpty.csv
+2017-01-03 16:48:18 INFO  Utils$:316 - addBlankCols3 transformation completed successfully
+2017-01-03 16:48:18 INFO  Utils$:343 - changeIOSField transformation completed successfully
+2017-01-03 16:48:18 INFO  Utils$:343 - changeIOSField transformation completed successfully
+2017-01-03 16:48:18 INFO  Acquisition$:127 - ### Loading file: ../../src/test/ressources/referential/AllRapReference.csv
+2017-01-03 16:48:18 INFO  Utils$:259 - addSupport transformation completed successfully
+2017-01-03 16:48:18 INFO  SubGraph2$:224 - ############ Ending phase 2 ############
+2017-01-03 16:48:18 INFO  SubGraph3$:28 - ############ Beggining phase 3 ############
+2017-01-03 16:48:18 INFO  SubGraph3$:54 - DELIMITER LOADED
+2017-01-03 16:48:21 INFO  SubGraph3$:188 - Writing .CSV file for hive...
+2017-01-03 16:48:58 INFO  SubGraph3$:190 - CSV file written
+2017-01-03 16:48:58 INFO  SubGraph3$:192 - ############ Ending phase 3 ############

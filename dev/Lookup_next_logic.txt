@@ -1,0 +1,214 @@
+
+ ********************** Final Logic ************** Working fine *************************
+val w = Window.partitionBy($"pht_idttic")
+val lookup_act = lkp_act.select($"*", rowNumber.over(w).alias("rn"))
+
+
+val rn_1 = lookup_act.filter($"rn" === 1).withColumnRenamed("act_idtedsdes","eds1").select($"pht_idttic",$"eds1")
+val rn_2 = lookup_act.filter($"rn" === 2).withColumnRenamed("act_idtedsdes","eds2").withColumnRenamed("pht_idttic","pht_idttic1").select($"pht_idttic1",$"eds2")
+val rn_3 = lookup_act.filter($"rn" === 3).withColumnRenamed("act_idtedsdes","eds3").withColumnRenamed("pht_idttic","pht_idttic2").select($"pht_idttic2",$"eds3")
+val rn_4 = lookup_act.filter($"rn" === 4).withColumnRenamed("act_idtedsdes","eds4").withColumnRenamed("pht_idttic","pht_idttic3").select($"pht_idttic3",$"eds4")
+val rn_5 = lookup_act.filter($"rn" === 5).withColumnRenamed("act_idtedsdes","eds5").withColumnRenamed("pht_idttic","pht_idttic4").select($"pht_idttic4",$"eds5")
+
+
+val comb1= rn_1.as('a).join(rn_2.as('b),$"pht_idttic" === $"b.pht_idttic1", "left_outer")
+
+val comb2= comb1.as('a).join(rn_3.as('b),$"pht_idttic" === $"b.pht_idttic2", "left_outer")
+
+val comb3= comb2.as('a).join(rn_4.as('b),$"pht_idttic" === $"b.pht_idttic3", "left_outer")
+
+val comb4= comb3.as('a).join(rn_5.as('b),$"pht_idttic" === $"b.pht_idttic4", "left_outer")
+
+val comb5=comb4.select("pht_idttic","eds1","eds2","eds3","eds4","eds5")
+
+val lkp_rep_join = df_addCol_is_repetitif.as('a).join(comb5.as('b),df_addCol_is_repetitif("num_ticket")===comb5("pht_idttic") , "left_outer")
+
+val df_lkp_col = lkp_rep_join.select($"*", $"b.*").withColumn("eds_active_1",$"eds1").withColumn("eds_active_2",$"eds2").withColumn("eds_active_3", $"eds3").withColumn("eds_active_4", $"eds4").withColumn("eds_active_5", $"eds5")
+
+df_lkp_col.select("num_ticket","eds_active_1","eds_active_2","eds_active_3","eds_active_4","eds_active_5").show()
+
+
+
+*********************************
+
+val a = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/lkp_act.csv")
+val b = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/main.csv")
+registerTempTable("lkp_act")
+val lookup = sqlContext.sql("SELECT *  FROM( SELECT *, ROW_NUMBER()OVER(PARTITION BY id ) rn FROM lkp_act) y WHERE rn IN(1,2)")
++---+-----+---+
+| id| name| rn|
++---+-----+---+
+|  1|aaaaa|  1|
+|  1|bbbbb|  2|
++---+-----+---+
+
+val rn_1 = lookup.filter($"rn" === 1)
+val rn_2 = lookup.filter($"rn" === 2)
+
+
+val main_df = b.as('a).join(rn_1.as('b),b("id_main") === rn_1("id"),"left_outer")
+val result = main_df.withColumn("name_1", when($"id" === $"id_main" && $"rn" === 1 , $"name").otherwise("null")).select("id_main","test","name_1","name_2")
+
+val result_1 = result.as('a).join(rn_2.as('b),b("id_main") === rn_1("id"),"left_outer")
+val result_2 = result_1.withColumn("name_2", when($"id" === $"id_main" && $"rn" === 2 , $"name").otherwise("null")).select("id_main","test","name_1","name_2")
+
+
++-------+------+------+------+---+-----+---+
+|id_main|  test|name_1|name_2| id| name| rn|
++-------+------+------+------+---+-----+---+
+|      1|sabari| aaaaa|      |  1|bbbbb|  2|
++-------+------+------+------+---+-----+---+
+
+
+
+
+
+
+val main_df = lookup.as('a).join(b.as('b),lookup("id") === b("id_main"),"left_outer")
+
+
+val main_df_output = main_df.select("*","b.*").withColumn("name_1", when($"id" === $"id_main" && $"rn" === 1 , $"name").otherwise("null")).withColumn("name_2", when($"id" === $"id_main" && $"rn" === 2 , $"name").otherwise("null"))
+
+
+val getvalue_1 = udf((a: Int, b: Int, c: String, d: Int, e: String) => if ( a == b && d == 1)e else null)
+val getvalue_2 = udf((a: Int, b: Int, c: String, d: Int, e: String) => if ( a == b && d == 2 && c!= null)e else null)
+val getvalue_2 = udf((a: Int, b: Int, c: String, d: Int, e: String) => if ( a == b && d == 2 )e else null)
+val result = main_df.select("*","b.*").withColumn("name_1",getvalue_1($"id_main",$"id",$"name_1",$"rn",$"name")).withColumn("name_2",getvalue_2($"id_main",$"id",$"name_1",$"rn",$"name"))
+
+
+
+def getClassAsString(a: string, b,int) = b match {
+  case 1: String => s + " is a String"
+  case 2: Int => "Int"
+  case _ => "Unknown"
+}
+
+*** not working
+
+val result = b.select("id_main","test","name_1,"name_2").withColumn("name_1", when($"b.id" === $"lkp_act.id_main" && $"lkp_act.rn" === 1 , $"lkp_act.name").otherwise("null"))
+
+
+
+***************************************
+lookup_Activations.registerTempTable("lookup_next")
+val lookup = sqlContext.sql("SELECT *  FROM( SELECT *, ROW_NUMBER()OVER(PARTITION BY lookup_key ) rn FROM lookup_next) y WHERE rn IN (1,2,3,4,5)")
+
+/* lookup_next table */
++----------------+----------------+-------------+
+|lookup_key      |     lookup_value      |     rn      |
++----------------+----------------+-------------+
+|            a|            sabari|      1|
+|            a|            nathan|      2|
+|            a|            vmssss|      3|
+|            a|            kinfee|      4|
+|            a|            gunnnn|      5|
+
+
+main_df
+
++----------------+----------------+-------------+-------------+-------------+-------------+
+|main_key     	|   a  			|		b		|	c		  |		d       |   e 		|
++----------------+----------------+-------------+-------------+-------------+-------------+
+|            a|  		          |     		 | 			   |			|				|
+
+
+
+
+val a = udf((lookup_key: String, main_key: String, rn: int, lookup_value: String ) => 
+if (lookup_key === main_key && rn === 1 ) lookup_valur
+else null) 
+
+val b = udf((lookup_key: String, main_key: String, rn: int, lookup_value: String ) => 
+if (lookup_key === main_key && rn === 2 ) lookup_valur
+else null) 
+
+val main_df_output = main_df.withColumn("a_lookup", a(lookup("lookup_key"), main_df("main_key"), lookup("rn"), lookup("lookup") ))
+.withColumn("b_lookup", b(lookup("lookup_key"), main_df("main_key"), lookup("rn"), lookup("lookup") ))
+
+
+
+
++----------------+----------------+-------------+-------------+-------------+-------------+
+|key      		|   a  			|		b		|	c		  |		d       |   e 		|
++----------------+----------------+-------------+-------------+-------------+-------------+
+|            1|  	  sabari  |     nathan		 | 	vms		   |	kinfe	|   gun		|
+
+
+
+
+      if (key == lkp_act.select("pht_idttic")) {
+        val f = lkp_act.where($"pht_idttic" === $"id").select("act_idtedsdes").collect().array
+        eds_active_1 = if (c1.toInt > 0) f(0).toString() else ""
+        eds_active_2 = if (c1.toInt > 0) f(1).toString() else ""
+        eds_active_3 = if (c1.toInt > 0) f(2).toString() else ""
+        eds_active_4 = if (c1.toInt > 0) f(3).toString() else ""
+        eds_active_5 = if (c1.toInt > 0) f(3).toString() else ""
+      }
+	  
+	  
+	  
+	  df = inner join (lookup_key = main_key )
+
++----------------+----------------+-------------+----------------+----------------+-------------+-------------+-------------+-------------+
+|lookup_key      |     lookup      |     rn      |main_key     	|   a  			|		b		|	c		  |		d       |   e 		|
++----------------+----------------+-------------+----------------+----------------+-------------+-------------+-------------+-------------+
+|            a|            sabari|      1		|            a|  		          |     		 | 			   |			|				|
+|            a|            nathan|      2		|            a|  		          |     		 | 			   |			|				|
+|            a|            vmssss|      3		|            a|  		          |     		 | 			   |			|				|
+|            a|            kinfee|      4		|            a|  		          |     		 | 			   |			|				|
+|            a|            gunnnn|      5		|            a|  		          |     		 | 			   |			|				|
+
+
+
+
+a = if (lookup_key = main_key && rn =1 ) loooup
+b = if (lookup_key = main_key && rn =2 ) loooup
+c = if (lookup_key = main_key && rn =3 ) loooup
+d = if (lookup_key = main_key && rn =4 ) loooup
+e = if (lookup_key = main_key && rn =5 ) loooup
+
+*************************************************************************
+
+
+
+
+
+
+
+
+val a = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/lkp_act.csv")
+val b = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/main.csv")
+registerTempTable("lkp_act")
+val lookup = sqlContext.sql("SELECT *  FROM( SELECT *, ROW_NUMBER()OVER(PARTITION BY id ) rn FROM lkp_act) y WHERE rn IN(1,2)")
++---+-----+---+
+| id| name| rn|
++---+-----+---+
+|  1|aaaaa|  1|
+|  1|bbbbb|  2|
+|  2|ccccc|  1|
++---+-----+---+
+
+
+val rn_1 = lookup.filter($"rn" === 1)
+val rn_2 = lookup.filter($"rn" === 2)
+
+
+val main_df = b.as('a).join(rn_1.as('b),b("id_main") === rn_1("id"),"left_outer")
+val result = main_df.withColumn("name_1", when($"id" === $"id_main" && $"rn" === 1 , $"name").otherwise("null")).select("id_main","test","name_1","name_2")
++-------+------+------+------+
+|id_main|  test|name_1|name_2|
++-------+------+------+------+
+|      1|sabari| aaaaa|      |
+|      2|nathan| ccccc|      |
++-------+------+------+------+
+
+
+val result_1 = result.as('a).join(rn_2.as('b),b("id_main") === rn_1("id"),"left_outer")
+val result_2 = result_1.withColumn("name_2", when($"id" === $"id_main" && $"rn" === 2 , $"name").otherwise("null")).select("id_main","test","name_1","name_2")
+
+
+
+
+lookup_act
+
+

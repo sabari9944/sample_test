@@ -1,0 +1,105 @@
+import java.text.SimpleDateFormat
+import java.sql.Timestamp
+import org.apache.spark.sql.functions.udf
+
+val date = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/a.csv")
+
++--------------+--------------+
+|      end_date|    start_date|
++--------------+--------------+
+|20161012000000|20161011000000|
++--------------+--------------+
+
+
+val getTimestamp = udf((x: Long) => { val format = new SimpleDateFormat("yyyyMMddhhmmss")
+if (x.toString() == "") null 
+else 
+{ 
+val d = format.parse(x.toString()); 
+val t = new Timestamp(d.getTime()); 
+ t} 
+})
+
+
+val dateDiffMin = udf((end:Timestamp,start:Timestamp) =>
+    {
+   (end.getTime -start.getTime)/(60*1000);                                                                         
+    })
+	
+val end =date.withColumn("result",dateDiffMin(getTimestamp("end_date".toLong),getTimestamp("start_date".toLong)))
+	
+***************** 
+	
+val date = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/a.csv")
+val getTimestamp_test = udf((x: String) => { val format = new SimpleDateFormat("yyyyMMddhhmmss")
+if (x.toString() == null) null 
+else 
+{ 
+val d = format.parse(x.toString()); 
+val t = new Timestamp(d.getTime()); 
+ t} 
+})
+
+
+	
+	val dateDiffMin = udf((end:Timestamp,start:Timestamp) =>
+    { if (end != null && start != null)
+   ((end.getTime -start.getTime)/(60*1000))else 0;                                                                         
+    })
+
+
+val test_end = date.withColumn("end_date", getTimestamp_test(date("end_date"))).withColumn("start_date", getTimestamp_test(date("start_date")))
+val test_end_result = test_end.withColumn("result",dateDiffMin(test_end("end_date"),test_end("start_date")))
+
+or
+
+val result = date.withColumn("result",dateDiffMin(getTimestamp_test(date("end_date")),getTimestamp_test(date("start_date"))))
+
+******************
+
+val b_date = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///home/sabarm/b.csv")
+
+
+val test_5 = b_date.withColumn("result", when(($"end_date".isNotNull)&& ($"start_date".isNotNull) , (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date")))- (b_date("minus")))).otherwise((dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))- (b_date("minus"))))
+val test_5 = b_date.withColumn("result", when(($"end_date".isNotNull) && ($"end_date" != "") && ($"start_date".isNotNull) && ($"start_date" != "")  , (dateDiffMin(getTimestamp_test($"end_date"),getTimestamp_test($"start_date"))- (b_date("minus")))).otherwise((dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))- (b_date("minus"))))
+
+
+
+
+
+val test_4 = b_date.withColumn("result", when(($"end_date".isNotNull)&& ($"start_date".isNotNull) , (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date"))))).otherwise((dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))))
+
+val test_5 = b_date.withColumn("result", when(($"end_date".isNotNull)&& ($"start_date".isNotNull) , (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date")))- (b_date("minus")))).otherwise((dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))- (b_date("minus"))))
+
+val test_8 = b_date.withColumn("result", when(($"end_date".isNotNull)&& ($"start_date".isNotNull) , (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date"))))).otherwise(when (($"2sd_end_date".isNotNull) && ($"start_date".isNotNull),(dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))).otherwise("0")))
+
+val test_9 = b_date.withColumn("result", when(($"end_date".isNotNull)&& ($"start_date".isNotNull) , (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date")))- (b_date("minus")))).otherwise(when (($"2sd_end_date".isNotNull) && ($"start_date".isNotNull) &&($"minus".isNotNull) ,(dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date")))- (b_date("minus")))).otherwise("0")))
+
+val test_6 = b_date.withColumn("result", expr("case when ($"end_date".isNotNull)&& ($"start_date".isNotNull) then (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date")))) else (when ($"2sd_end_date".isNotNull)&& ($"start_date".isNotNull)") then (dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))) else 0 end")
+
+val test_7 = b_date.withColumn("result", expr("case when ($"end_date".isNotNull)&& ($"start_date".isNotNull) then (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date")))) else 0 end")
+
+
+df.select(col("PROCESS_ID"),when(col("PAYMODE") === lit("M"),(when(col("CURRENCY") === lit("USD"), col("PREMIUM") * col("RATE"))
+.otherwise(col("PREMIUM"))) * 12)
+	.otherwise(when(col("CURRENCY") === lit("USD"), col("PREMIUM") * col("RATE")).otherwise(col("PREMIUM")))
+)
+
+**********
+
+1)	out.duree_totale =>
+val test = date.withColumn("result", when(($"end_date".isNull) && ($"start_date".isNull), "0").otherwise(dateDiffMin(getTimestamp_test(date("end_date")),getTimestamp_test(date("start_date")))))
+
+2)	 out.delai_activation_pec = >
+val test_3 = date.withColumn("result", when(($"end_date".isNotNull) && ($"start_date".isNotNull) && (($"end_date").gt($"start_date")) , (dateDiffMin(getTimestamp_test(date("end_date")),getTimestamp_test(date("start_date"))))).otherwise("1"))
+
+3)	out.duree_indisponibilite_hors_gel =>
+val test_5 = b_date.withColumn("result", when(($"end_date".isNotNull)&& ($"start_date".isNotNull) , (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date")))- (b_date("minus")))).otherwise((dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))- (b_date("minus"))))
+
+4)	out.duree_indisponibilite
+val test_4 = b_date.withColumn("result", when(($"end_date".isNotNull)&& ($"start_date".isNotNull) , (dateDiffMin(getTimestamp_test(b_date("end_date")),getTimestamp_test(b_date("start_date"))))).otherwise((dateDiffMin(getTimestamp_test(b_date("2sd_end_date")),getTimestamp_test(b_date("start_date"))))))
+
+
+
+a b c 
+

@@ -1,0 +1,63 @@
+import org.apache.spark.SparkConf
+import org.apache.spark.SparkContext
+import org.apache.spark.SparkContext._
+import org.apache.spark.sql._
+import com.typesafe.config.{ Config, ConfigFactory }
+
+object fosav_transformation {
+  def main(args: Array[String]) {
+    val conf = new SparkConf().setAppName("fosav_transformation").setMaster("local")
+    val sc = new SparkContext(conf)
+    val sqlContext = new org.apache.spark.sql.SQLContext(sc)
+
+    val prop = ConfigFactory.load()
+
+    val df_incidentologie_FOSAV = sqlContext.read
+      .format("com.databricks.spark.csv")
+      .option("delimiter", ";")
+      .option("header", "true") // Use first line of all files as header
+      .option("inferSchema", "true") // Automatically infer data types
+      .load(prop.getString("dev.incidentologie_FOSAV"))
+
+    val df_incidentologie_wasac = sqlContext.read
+      .format("com.databricks.spark.csv")
+      .option("delimiter", ";")
+      .option("header", "true") // Use first line of all files as header
+      .option("inferSchema", "true") // Automatically infer data types
+      .load(prop.getString("dev.incidentologie_wasac"))
+
+    df_incidentologie_FOSAV.show()
+
+    val df_ordered_incidentologie_FOSAV = df_incidentologie_FOSAV.orderBy("pht_idtcom")
+
+    import sqlContext.implicits._
+
+    val df_replaced_incidentologie_FOSAV = df_ordered_incidentologie_FOSAV.map(row => {
+      val x = row.getAs[String](24)
+      val detail_pbm = if (x.contains("\\x92")) x.replace("\\x92", "'") else x
+      Row(row(0), row(1), row(2), row(3), row(4), row(5), row(6), row(7), row(8), row(9),
+        row(10), row(11), row(12), row(13), row(14), row(15), row(16), row(17), row(18), row(19),
+        row(20), row(21), row(22), row(23), detail_pbm, row(25), row(26), row(27), row(28), row(29),
+        row(30), row(31), row(32), row(33), row(34), row(35), row(36), row(37), row(38), row(39),
+        row(40), row(41), row(42), row(43), row(44), row(45), row(46), row(47), row(48), row(49),
+        row(50), row(51), row(52), row(53), row(54), row(55), row(56), row(57), row(58), row(59))
+    })
+
+    val df_incidentologie_FOSAV_1 = df_incidentologie_FOSAV.sqlContext.createDataFrame(df_replaced_incidentologie_FOSAV, df_incidentologie_FOSAV.schema)
+
+    val df_incidentologie_FOSAV_renamedCol = df_incidentologie_FOSAV_1.withColumnRenamed("pht_idtcom", "feuillet")
+
+    val df_ordered_incidentologie_wasac = df_incidentologie_wasac.orderBy("feuillet")
+
+    val df_replaced_incidentologie_wasac = df_ordered_incidentologie_wasac.na.replace("ios", Map("\n" -> ""))
+
+    val joined_FOSAV = df_incidentologie_FOSAV_renamedCol.as('a).join(df_replaced_incidentologie_wasac.as('b), $"a.feuillet" === $"b.feuillet", "left_outer")
+
+    val df_FOSAV = joined_FOSAV.select($"a.*", $"b.ip_admin", $"b.type_routeur", $"b.ios", $"b.constructeur", $"b.chassis")
+
+    df_FOSAV.write.format("com.databricks.spark.csv").option("delimiter", ";").save(prop.getString("dev.output_fosav"))
+
+    sc.stop()
+    //println("Hello")
+  }
+}

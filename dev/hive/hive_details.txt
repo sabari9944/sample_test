@@ -1,0 +1,5 @@
+use obs;
+show tables;
+
+
+drop table pn_parc_marine2;

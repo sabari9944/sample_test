@@ -1,0 +1,34 @@
+******************************  INSEE  *******************************
+
+def correct_code_postal(s:String): String =
+  {
+    if(s!=null && s.length()==5) s
+    else if(s!=null && s.length()==4) "0".concat(s)
+    else s
+  }
+  
+ /* need to .replace("û", "u") */
+def correct_nom_commune(s:String):String =
+  {
+    val result = s.replace("-", " ")
+    result
+  } 
+
+val communes = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/communes_INSEE_utile.csv")
+
+val correspondance = sqlContext.read.format("com.databricks.spark.csv").option("delimiter",";").option("inferSchema","true").option("header","true").load("file:///obs/data/raw/correspondance-code-insee-code-postal_utile.csv")
+
+val insee = communes.as('a).join(correspondance.as('b), $"a.code_insee" === $"b.code_insee","inner")
+
+val insee_out = insee.select($"a.nom_commune",$"a.poulation_tot",$"a.code_insee",$"a.nom_commune_caps",$"b.code_postal",$"b.nom_commune_caps")
+
+case class schema(nom_commune: String, poulation_tot: String, code_insee: String, nom_commune_caps: String, code_postal: String, nom_commune_caps2: String)
+
+val insee_out_df= insee_out.map(x => {schema(x(0).toString,x(1).toString,x(2).toString,x(3).toString,correct_code_postal(x(4).toString),correct_nom_commune(x(5).toString))}).toDF
+
+
+insee_out_df.show()
+
+
+
+***********************************************
